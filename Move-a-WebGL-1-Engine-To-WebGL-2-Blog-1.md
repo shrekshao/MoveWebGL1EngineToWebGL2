@@ -2,9 +2,9 @@
 
 Some of the new features are already available in WebGL 1 as extensions, 
 but will be part of the core spec in WebGL 2, which means support is guaranteed. 
-In this first blog, we are going to focus on these promoted features, together with
-potential compatiability issue they may cause. 
-Let’s take a look at how the code is going to change. 
+In this first blog entry we are going to focus on these promoted features, together with
+potential compatibility issues they may cause. 
+Let’s take a look at how the code changes. 
 
 ## Multiple Render Targets - Deferred Rendering
 
@@ -12,7 +12,7 @@ A big one.
 
 ### WebGL 1
 
-For MRT, we used `webgl_draw_buffer` extension as a work round to write g-buffers in a single pass. 
+For MRT, we used `webgl_draw_buffer` extension as a work-around to write g-buffers in a single pass. 
 Though it is widely supported, the extension-style code doesn’t make us feel good:
 
 ```javascript
@@ -64,7 +64,7 @@ void main() {
 
 ### WebGL 2
 
-With MRT, our codes become neat and clean in WebGL 2. 
+For MRT our code becomes neat and clean in WebGL 2. 
 
 ```javascript
 gl.framebufferTexture2D(gl.DRAW_FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, tex[0], 0);
@@ -72,10 +72,10 @@ gl.framebufferTexture2D(gl.DRAW_FRAMEBUFFER, gl.COLOR_ATTACHMENT1, gl.TEXTURE_2D
 gl.framebufferTexture2D(gl.DRAW_FRAMEBUFFER, gl.COLOR_ATTACHMENT2, gl.TEXTURE_2D, tex[2], 0);
 ```
 
-Instead of mapping color attachments to draw buffer, 
-we directly use multiple `out` in the fragment shader. 
-This actually benefits from the new GLSL 300 es, which will be introduced in details later. 
-But it is straight forward enough. 
+Instead of mapping color attachments to the draw buffer, 
+we directly use multiple `out` variables in the fragment shader. 
+This code actually benefits from the new GLSL 3.00 ES, which we will discuss later in detail. 
+However, using `out` itself is straightforward. 
 
 ```glsl
 #version 300 es
@@ -94,8 +94,8 @@ void main()
 }
 ```
 
-Additionally, since **Texture 2D Array** is available now, we can also choose to 
-render to different layer of a texture 2d array instead of separate 2d textures. 
+Additionally, since **Texture 2D Array** is now available, we can choose to 
+render to different layers of an array of texture 2d's instead of separate 2d textures. 
 
 ```javascript
 gl.framebufferTextureLayer(gl.DRAW_FRAMEBUFFER, gl.COLOR_ATTACHMENT0, texture, 0, 0);
