@@ -1,4 +1,53 @@
-[TODO: Opening] Bla bla bla
+WebGL 2 is now coming! Google Chrome just announced 100% of the WebGL 2 
+conformance Suite is passing* (on the first configurations)
+at SIGGRAPH 2016. 
+
+Now I have an engine works well in WebGL 1, how am I going to improve that 
+to WebGL 2? Things I may wonder:  
+* What has to be changed?
+* What can be done in a better way?
+* What new features can I play with?
+
+
+# How do I get WebGL 2 working
+
+## Get a WebGL 2 Implementation (Browser)
+
+You may have seen this for many times, let's just hit the point
+* Just do it: [Getting a WebGL Implementation](https://www.khronos.org/webgl/wiki/Getting_a_WebGL_Implementation)
+* Check if your current browser support it: [WebGL Report](https://www.khronos.org/webgl/wiki/Getting_a_WebGL_Implementation)
+
+## Get a WebGL 2 Context
+
+Programmers always try to support as many browsers as possible. So do I. 
+On top the WebGL 1 version of getContext, we will try to access WebGL 2 first. 
+If failed, then just back to WebGL 1 routine. 
+We use Cesium as an example: 
+
+```javascript
+var defaultToWebgl2 = false;
+var webgl2Supported = (typeof WebGL2RenderingContext !== 'undefined');
+var webgl2 = false;
+var glContext;
+
+if (defaultToWebgl2 && webgl2Supported) {
+    glContext = canvas.getContext('webgl2', webglOptions) || canvas.getContext('experimental-webgl2', webglOptions) || undefined;
+    if (defined(glContext)) {
+        webgl2 = true;
+    }
+}
+if (!defined(glContext)) {
+    glContext = canvas.getContext('webgl', webglOptions) || canvas.getContext('experimental-webgl', webglOptions) || undefined;
+}
+if (!defined(glContext)) {
+    throw new RuntimeError('The browser supports WebGL, but initialization failed.');
+}
+```
+
+
+
+
+# Promoted Features
 
 Some of the new features are already available in WebGL 1 as extensions, 
 but will be part of the core spec in WebGL 2, which means support is guaranteed. 
@@ -20,7 +69,7 @@ var ext = gl.getExtension('WEBGL_draw_buffers');
 if (!ext) {
   // ...
 }
-``` 
+```
 
 We then bind multiple textures, tx[] in the example below, 
 to different framebuffer color attachments.
@@ -122,3 +171,4 @@ gl.framebufferTextureLayer(gl.DRAW_FRAMEBUFFER, gl.COLOR_ATTACHMENT2, texture, 0
 * http://www.gamedev.net/topic/655969-speed-gluniform-vs-uniform-buffer-objects/ 
 * Sijie Tian https://hacks.mozilla.org/2014/01/webgl-deferred-shading/
 * Dong Dong https://www.zhihu.com/question/49327688/answer/115691345?from=profile_answer_card 
+* Cesium https://github.com/AnalyticalGraphicsInc/cesium 
