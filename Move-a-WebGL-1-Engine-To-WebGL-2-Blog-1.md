@@ -185,6 +185,11 @@ This can be expensive because it forces the GPU to bypass a lot of it's normal f
 
 
 
+# Other compatibility issues
+
+
+
+
 
 # Credits
 
