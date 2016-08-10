@@ -61,8 +61,8 @@ A big one.
 
 ### WebGL 1
 
-For MRT, we used `webgl_draw_buffer` extension as a work-around to write g-buffers in a single pass. 
-Though it is widely supported, the extension-style code doesn’t make us feel good:
+For MRT, we used `WEBGL_draw_buffers` extension as a work-around to write g-buffers in a single pass. 
+Though it is widely supported (50%+ actually according to webgl stats), the extension-style code doesn’t make us feel good:
 
 ```javascript
 var ext = gl.getExtension('WEBGL_draw_buffers');
@@ -155,7 +155,32 @@ gl.framebufferTextureLayer(gl.DRAW_FRAMEBUFFER, gl.COLOR_ATTACHMENT2, texture, 0
 
 
 
+## Instancing
 
+Exposed through the `ANGLE_instanced_arrays` extension at WebGL 1 age (90%+ support). 
+Now we can simply use `drawArraysInstanced` or 
+`drawArraysInstanced` for the draw calls. 
+
+Instancing is a great performance booster for certain types of geometry, especially those in 
+a great number but without too many vertices, grass and fur, for example. 
+
+
+
+
+## Vertex Array Object 
+
+TODO: more to do with engine design optimization
+
+
+
+## Fragment Depth
+
+Exposed through the `EXT_frag_depth` extension in WebGL 1 (66%). 
+
+TODO: no practice yet
+
+>Lets you manipulate the depth of a fragment from the fragment shader. 
+This can be expensive because it forces the GPU to bypass a lot of it's normal fragment discard behavior, but can also allow for some interesting effects that would be difficult to accomplish without having incredibly high poly geometry.
 
 
 
@@ -172,3 +197,4 @@ gl.framebufferTextureLayer(gl.DRAW_FRAMEBUFFER, gl.COLOR_ATTACHMENT2, texture, 0
 * Sijie Tian https://hacks.mozilla.org/2014/01/webgl-deferred-shading/
 * Dong Dong https://www.zhihu.com/question/49327688/answer/115691345?from=profile_answer_card 
 * Cesium https://github.com/AnalyticalGraphicsInc/cesium 
+* WebGL Stats http://webglstats.com/ 
