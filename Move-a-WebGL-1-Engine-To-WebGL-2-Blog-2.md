@@ -5,6 +5,27 @@ what cool things can we do with them in our engine.
 # New features
 
 ## Multisampled Renderbuffers
+
+Previously if we want antialising we would either have to 
+render it to the default backbuffer or 
+perform our own post-process AA (like FXAA) on content rendered to a texture.
+
+But with Multisampled Renderbuffers, we can now use the general renderring pipeline in 
+WebGL as other platform. 
+> pre-z pass --> rendering pass to FBO --> postprocessing pass --> render to window
+
+`renderbufferStorageMultisample` is the function directly related here. 
+
+```javascript
+var colorRenderbuffer = gl.createRenderbuffer();
+gl.bindRenderbuffer(gl.RENDERBUFFER, colorRenderbuffer);
+gl.renderbufferStorageMultisample(gl.RENDERBUFFER, 4, gl.RGBA8, FRAMEBUFFER_SIZE.x, FRAMEBUFFER_SIZE.y);
+```
+
+Bind a Texture to a framebuffer, and use `blitFramebuffer` ... TODO
+
+
+
 * Make FBO useful
 * post processing freed from rendering pipeline
 
