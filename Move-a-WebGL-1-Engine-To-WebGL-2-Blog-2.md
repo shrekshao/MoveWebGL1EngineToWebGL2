@@ -22,21 +22,85 @@ gl.bindRenderbuffer(gl.RENDERBUFFER, colorRenderbuffer);
 gl.renderbufferStorageMultisample(gl.RENDERBUFFER, 4, gl.RGBA8, FRAMEBUFFER_SIZE.x, FRAMEBUFFER_SIZE.y);
 ```
 
-Bind a Texture to a framebuffer, and use `blitFramebuffer` ... TODO
-
+Bind a Texture to a framebuffer, and use `blitFramebuffer` ... TODO: test if the setup in webgl2 sample pack is minimal
 
 
 * Make FBO useful
 * post processing freed from rendering pipeline
 
 ## 3D Texture
-* Volumetric effects in games (fire, smoke, light rays, realistic fog)
-* Caching light for real time global illumination
-* MRI, CT scans, cross section
-* Terrain textures
+
+The first thing come to mind is Volumetric effects, like fire, smoke, light rays, realistic fog, etc. 
+Now we can bring these features into our WebGL engine. 
+Besides these, 3D texture be applied for Medical science data like MRI, CT scans. 
+It is very useful when implementing cross section. 
+In terms of performance, it can be used to cache light for real-time global illumination. 
+
+WebGL support for 3D texture is as good as the 2D one. We have fast accessing speed and 
+native tri-linear interpolation. 
+
+The code for setting up a 3D texture mostly has their 2D texture counterpart. 
+
+| Texture 2D | Texture 3D |
+|------------|------------|
+|`texImage2D`|`texImage3D`|
+|`texSubImage2D`|`texSubImage3D`|
+|`copyTexImage2D`|`copyTexImage3D`|
+|`compressedTexImage2D`|`compressedTexImage3D`|
+|`compressedTexSubImage2D`|`compressedTexSubImage3D`|
+|`texStorage2D`|`texStorage3D`|
+
+There are certain things that do not match exactly. 
+For example, since we have one more dimension we will have `depth`, `zoffset`, `TEXTURE_WRAP_T`
+for 3D texture. Also, the internal formate, format, and type combination is not 100% matched. 
+In addition, the sampler in shaders is now `sampler3D` instead of `sampler2D`. 
+Here's an example setup: 
+
+```javascript
+var texture = gl.createTexture();
+gl.activeTexture(gl.TEXTURE0);
+gl.bindTexture(gl.TEXTURE_3D, texture);
+gl.texParameteri(gl.TEXTURE_3D, gl.TEXTURE_BASE_LEVEL, 0);
+gl.texParameteri(gl.TEXTURE_3D, gl.TEXTURE_MAX_LEVEL, Math.log2(SIZE));
+gl.texParameteri(gl.TEXTURE_3D, gl.TEXTURE_MIN_FILTER, gl.LINEAR_MIPMAP_LINEAR);
+gl.texParameteri(gl.TEXTURE_3D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+
+gl.texImage3D(
+    gl.TEXTURE_3D,  // target
+    0,              // level
+    gl.R8,        // internalformat
+    SIZE,           // width
+    SIZE,           // height
+    SIZE,           // depth
+    0,              // border
+    gl.RED,         // format
+    gl.UNSIGNED_BYTE,       // type
+    data            // pixel
+    );
+
+gl.generateMipmap(gl.TEXTURE_3D);
+```
 
 
-## Sampler Objects
+Last but not the least, 2D Texture Array is coming together with 3D Texture feature. 
+It has its own sampler: `sampler2DArray`, but it shares the `texImage3D` GL functions. 
+Here's an example call: 
+
+```javascript
+gl.texImage3D(
+    gl.TEXTURE_2D_ARRAY,
+    0,
+    gl.RGBA,
+    IMAGE_SIZE.width,
+    IMAGE_SIZE.height,
+    NUM_IMAGES,
+    0,
+    gl.RGBA,
+    gl.UNSIGNED_BYTE,
+    pixels
+);
+```
+
 
 
 ## Uniform Buffer
@@ -52,6 +116,16 @@ Bound to multiple programs at the same time
 ## Query Objects
 * Occlusion testing
 * picking
+
+
+
+
+
+## Sampler Objects
+
+
+
+
 
 
 ## Transform Feedback
