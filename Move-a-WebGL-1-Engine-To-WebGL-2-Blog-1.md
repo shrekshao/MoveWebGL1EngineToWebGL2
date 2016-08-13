@@ -203,3 +203,4 @@ This can be expensive because it forces the GPU to bypass a lot of it's normal f
 * Dong Dong https://www.zhihu.com/question/49327688/answer/115691345?from=profile_answer_card 
 * Cesium https://github.com/AnalyticalGraphicsInc/cesium 
 * WebGL Stats http://webglstats.com/ 
+* WebGL 2 for Siggraph Asia 2015 https://docs.google.com/presentation/d/1Orx0GB0cQcYhHkYsaEcoo5js3c5-pv7ahPniIRIzzfg/edit#slide=id.gd1fc5cab2_0_8
