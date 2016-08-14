@@ -197,7 +197,14 @@ http://stackoverflow.com/questions/38841124/updating-uniform-buffer-data-in-webg
 
 ## Sync Objects
 
-TODO: limited knowledge on this part, and sample pack didn't cover this
+Sync objects can be used to synchronize execution between the GL server and the client, which 
+gives you more control over GPU by letting you set a fence to inform the GPU to wait until a set of 
+GL operations have finished. Sync objects are more efficient than `gl.finish`. 
+
+We can get more accurate benchmarks with sync objects. In addition, applications like image 
+manipulation where data of each frame comes from CPU will be benefitted with this degree of 
+control. 
+
 
 From Brandon Jones *"What's coming in WebGL 2"*
 >With WebGL today the path from Javascript to GPU to Screen fairly opaque to developers. 
