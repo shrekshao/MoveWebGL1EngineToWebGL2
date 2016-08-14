@@ -196,9 +196,53 @@ http://stackoverflow.com/questions/38841124/updating-uniform-buffer-data-in-webg
 
 
 ## Sync Objects
+
+TODO: limited knowledge on this part, and sample pack didn't cover this
+
+From Brandon Jones *"What's coming in WebGL 2"*
+>With WebGL today the path from Javascript to GPU to Screen fairly opaque to developers. 
+You dispatch draw commands and at some undefined point in the future the results (probably) show up on the screen. 
+Sync objects allow the developer to gain a little more insight into when the GPU has completed it's work. 
+Using gl.fenceSync, you can place a marker at some point in the GPU command stream 
+and then later call gl.clientWaitSync to pause Javascript execution 
+until the GPU has completed all commands up to the fence. 
+Obviously blocking execution isn't desirable for applications that want to render fast, 
+but this can be very beneficial for getting accurate benchmarks. 
+It may also possibly be used in the future for synchronizing between workers.
+
 * For benchmarks
 
+
+
 ## Query Objects
+
+This is very useful when we want to do occulsion testing. 
+We can know how many geometries are actually drawn by erforming 
+a `gl.ANY_SAMPLES_PASSED` query around a set of draw calls. 
+We can get rid of those picking method now. 
+
+Keep in mind that these queries are asychronous. A query's result is never available 
+in the same frame the query is issued. 
+
+```javascript
+gl.beginQuery(gl.ANY_SAMPLES_PASSED, query);
+gl.drawArraysInstanced(gl.TRIANGLES, 0, 3, 2);
+gl.endQuery(gl.ANY_SAMPLES_PASSED);
+//...
+(function tick() {
+    if (!gl.getQueryParameter(query, gl.QUERY_RESULT_AVAILABLE)) {
+        // A query's result is never available in the same frame
+        // the query was issued.  Try in the next frame.
+        requestAnimationFrame(tick);
+        return;
+    }
+
+    var samplesPassed = gl.getQueryParameter(query, gl.QUERY_RESULT);
+    gl.deleteQuery(query);
+})();
+```
+
+
 * Occlusion testing
 * picking
 
@@ -233,16 +277,16 @@ http://stackoverflow.com/questions/38841124/updating-uniform-buffer-data-in-webg
 
 ## Texture LOD
 * Texture Network streaming
+* Bias
 
-
-## Primitive restart
 
 
 ## Textures tiny: 
 * ETC2/EAC
 * Integer textures
 * Non-Power-of-Two Texture
-* 2D Sprite
+    * 2D Sprite
 * Additional Texture Formats
 * sRGB
  
+ ## Primitive restart
