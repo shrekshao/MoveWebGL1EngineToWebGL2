@@ -184,7 +184,7 @@ Also, since we use a struct to wrap our data, it should be rounded to a multiply
 That's why we have 3 extra zero after the `float shininess`. 
 
 
-Another concerns is aobut updating Uniform Block. There are several different approaches that can get us there. 
+Another concerns is about updating Uniform Block. There are several different approaches that can get us there. 
 But their performance can vary. 
 
 TODO: http://www.gamedev.net/topic/655969-speed-gluniform-vs-uniform-buffer-objects/
@@ -238,7 +238,37 @@ gl.endQuery(gl.ANY_SAMPLES_PASSED);
 
 ## Sampler Objects
 
-TODO
+In WebGL 1 texture image data and sampling information (which tells GPU how to read the image data) 
+are both stored in texture object. It can be annoying when we want to read from the same texture twice 
+but with different method (say, linear filtering vs nearest filtering) because we should have 
+two texture objects. But with sampler objects, we can separate these two concepts. We can have one 
+texture object and two different sampler objects. It will be a change in how our engine organize 
+textures.  
+Here's an example: 
+
+```javascript
+var samplerA = gl.createSampler();
+gl.samplerParameteri(samplerA, gl.TEXTURE_MIN_FILTER, gl.NEAREST_MIPMAP_NEAREST);
+gl.samplerParameteri(samplerA, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
+gl.samplerParameteri(samplerA, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+gl.samplerParameteri(samplerA, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+
+var samplerB = gl.createSampler();
+gl.samplerParameteri(samplerB, gl.TEXTURE_MIN_FILTER, gl.LINEAR_MIPMAP_LINEAR);
+gl.samplerParameteri(samplerB, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+gl.samplerParameteri(samplerB, gl.TEXTURE_WRAP_S, gl.MIRRORED_REPEAT);
+gl.samplerParameteri(samplerB, gl.TEXTURE_WRAP_T, gl.MIRRORED_REPEAT);
+
+// ...
+
+gl.activeTexture(gl.TEXTURE0);
+gl.bindTexture(gl.TEXTURE_2D, texture);
+gl.bindSampler(0, samplerA);
+
+gl.activeTexture(gl.TEXTURE1);
+gl.bindTexture(gl.TEXTURE_2D, texture);
+gl.bindSampler(1, samplerB);
+```
 
 
 ## Transform Feedback
