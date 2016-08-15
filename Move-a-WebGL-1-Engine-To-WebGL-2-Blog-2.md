@@ -184,8 +184,6 @@ Also, since we use a struct to wrap our data, it should be rounded to a multiply
 That's why we have 3 extra zero after the `float shininess`. 
 
 
-
-
 Another concerns is aobut updating Uniform Block. There are several different approaches that can get us there. 
 But their performance can vary. 
 
@@ -204,21 +202,6 @@ GL operations have finished. Sync objects are more efficient than `gl.finish`.
 We can get more accurate benchmarks with sync objects. In addition, applications like image 
 manipulation where data of each frame comes from CPU will be benefitted with this degree of 
 control. 
-
-
-From Brandon Jones *"What's coming in WebGL 2"*
->With WebGL today the path from Javascript to GPU to Screen fairly opaque to developers. 
-You dispatch draw commands and at some undefined point in the future the results (probably) show up on the screen. 
-Sync objects allow the developer to gain a little more insight into when the GPU has completed it's work. 
-Using gl.fenceSync, you can place a marker at some point in the GPU command stream 
-and then later call gl.clientWaitSync to pause Javascript execution 
-until the GPU has completed all commands up to the fence. 
-Obviously blocking execution isn't desirable for applications that want to render fast, 
-but this can be very beneficial for getting accurate benchmarks. 
-It may also possibly be used in the future for synchronizing between workers.
-
-* For benchmarks
-
 
 
 ## Query Objects
@@ -250,22 +233,119 @@ gl.endQuery(gl.ANY_SAMPLES_PASSED);
 ```
 
 
-* Occlusion testing
-* picking
-
-
 
 
 
 ## Sampler Objects
 
-
-
-
+TODO
 
 
 ## Transform Feedback
-* Particle system (Simulation)
+
+Transform feedback allows the output of the vertex shader to be captured in a buffer object. 
+This is useful for things like particle system and simulation that perform on GPU without 
+any CPU intervention. 
+
+In WebGL 1, when we want to implement such feature, usually a texture 
+storing the states of particles is inevitable. (Two textures to be precise, 
+storing states from previous frame and current frame, and ping-pong between them)
+
+Here's an example of WebGL 1 approach (from [toji's WebGL Particle](https://github.com/toji/webgl2-particles))
+
+In the first pass fragment shader, 
+do the simulation, and store the position results in a texture. 
+
+```GLSL
+// First pass - Fragment Shader
+uniform sampler2D tPositions;
+varying vec2 vUv;
+// ...
+vec4 runSimulation(vec4 pos) {
+    // simulation
+    // ...
+    return pos;
+}
+
+void main() {
+    vec4 pos = texture2D( tPositions, vUv );
+    //...
+    pos = runSimulation(pos);
+
+    // Write new position out
+    gl_FragColor = pos;
+}
+```
+
+And then we use this position texture as an input for our second pass vertex shader.
+// Second pass - Vertex Shader
+```GLSL
+attribute vec3 position;
+uniform float pointSize;
+uniform sampler2D map;
+varying vec2 vUv;
+
+//...
+
+void main() {
+    vUv = position.xy + vec2( 0.5 / width, 0.5 / height );
+    vec3 color = texture2D( map, vUv ).rgb;
+    gl_PointSize = pointSize;
+    gl_Position = projectionMatrix * modelViewMatrix * vec4( color, 1.0);
+}
+``` 
+
+This is how we do in WebGL 2. With Transform feedback, we can discard the fragment shader 
+in step 1 and the texture now. We write the output (position) of the vertex shader in step 1 to the 
+vertex attribute array input of step 2. (Actually, you still need a placeholder trivial fragment shader 
+for the first step to correctly compile the program)
+
+
+```GLSL
+// First pass - Vertex Shader
+// ...
+out vec3 v_position;
+void main() {
+    // ...
+    v_position = u_projMatrix * u_modelViewMatrix * vec4(a_position, 1.0);
+}
+```
+
+```GLSL
+// Second pass - Vertex Shader
+in vec3 a_position;
+void main() {
+    gl_Position = projectionMatrix * modelViewMatrix * vec4( a_position, 1.0 );
+    // ...
+}
+```
+
+And here's how we bind the buffers (from [WebGL2SamplesPack](https://github.com/WebGLSamples/WebGL2Samples))
+
+```javascript
+var transformFeedback = gl.createTransformFeedback();
+var varyings = ['v_position', /*...*/];
+gl.transformFeedbackVaryings(programTransform, varyings, gl.SEPARATE_ATTRIBS);
+
+// ...
+
+gl.bindBuffer(gl.ARRAY_BUFFER, particleVBOs[i][Particle.POSITION]);
+gl.bufferData(gl.ARRAY_BUFFER, particlePositions, gl.STREAM_COPY);
+
+// ...
+
+gl.bindTransformFeedback(gl.TRANSFORM_FEEDBACK, transformFeedback);
+gl.bindBufferBase(gl.TRANSFORM_FEEDBACK_BUFFER, 0, particleVBOs[(currentSourceIdx + 1) % 2][Particle.POSITION]);
+gl.enable(gl.RASTERIZER_DISCARD);   // we are not drawing
+gl.beginTransformFeedback(gl.POINTS);
+
+gl.drawArrays(gl.POINTS, 0, NUM_PARTICLES);
+
+gl.endTransformFeedback();
+gl.disable(gl.RASTERIZER_DISCARD);
+
+gl.bindBufferBase(gl.TRANSFORM_FEEDBACK_BUFFER, 0, null);
+```
 
 
 ## New GLSL 3.00 ES Shader
