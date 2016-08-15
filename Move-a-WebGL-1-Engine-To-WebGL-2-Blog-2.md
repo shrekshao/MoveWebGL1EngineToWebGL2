@@ -356,14 +356,10 @@ And here's how we bind the buffers (from [WebGL2SamplesPack](https://github.com/
 var transformFeedback = gl.createTransformFeedback();
 var varyings = ['v_position', /*...*/];
 gl.transformFeedbackVaryings(programTransform, varyings, gl.SEPARATE_ATTRIBS);
-
 // ...
-
 gl.bindBuffer(gl.ARRAY_BUFFER, particleVBOs[i][Particle.POSITION]);
 gl.bufferData(gl.ARRAY_BUFFER, particlePositions, gl.STREAM_COPY);
-
 // ...
-
 gl.bindTransformFeedback(gl.TRANSFORM_FEEDBACK, transformFeedback);
 gl.bindBufferBase(gl.TRANSFORM_FEEDBACK_BUFFER, 0, particleVBOs[(currentSourceIdx + 1) % 2][Particle.POSITION]);
 gl.enable(gl.RASTERIZER_DISCARD);   // we are not drawing
@@ -378,35 +374,206 @@ gl.bindBufferBase(gl.TRANSFORM_FEEDBACK_BUFFER, 0, null);
 ```
 
 
+## A set of texture new features:
+
+Here is a list of new texture features. 
+
+* sRGB textures
+Allow the application to perform gamma-correct rendering. 
+
+```javascript
+gl.texImage2D(
+    gl.TEXTURE_2D,
+    0, // Level of details
+    gl.SRGB8, // Format
+    gl.RGB,
+    gl.UNSIGNED_BYTE, // Size of each channel
+    image
+);
+```
+
+Note that sRGB texture will be automatically converted to linear space upon being fetched in the shader. 
+
+
+* Vertex texture
+    * terrain
+    * water
+    * skeleton animation
+
+* Texture LOD 
+
+The texture LOD parameter
+used to determine which mipmap to fetch from can now be
+clamped. And the base and maximum mipmap level can
+be clamped. This allows mipmap streaming, which is very useful for WebGL environment, 
+where textures are downloaded via network. 
+
+```javascript
+gl.texParameterf(gl.TEXTURE_2D, gl.TEXTURE_MIN_LOD, 0.0);
+gl.texParameterf(gl.TEXTURE_2D, gl.TEXTURE_MAX_LOD, 10.0);
+```
+
+Additionally, the LOD Bias in shader makes mipmap level control possible in physically based rendering. 
+
+```GLSL
+color = texture(diffuse, v_st, lodBias);
+```
+
+* ETC2/EAC texture compression
+
+A mandatory support. 
+
+```javascript
+gl.compressedTexImage2D(
+    gl.TEXTURE_2D, 
+    0, 
+    gl.COMPRESSED_RGBA8_ETC2_EAC, 
+    IMAGE_SIZE.width, 
+    IMAGE_SIZE.height, 
+    0, 
+    pixels
+);
+```
+
+* Integer textures
+
+* Non-Power-of-Two Texture
+    * texturing video
+    * 2D Sprite
+
+* Floating point textures
+    - half-float: High dynamic range imaging
+    - full-float: Variance shadow maps soft shadow
+
+* A set of additional texture formats
+
+```
+textureFormats[TextureTypes.RGB] = {
+    internalFormat: gl.RGB,
+    format: gl.RGB,
+    type: gl.UNSIGNED_BYTE
+};
+
+textureFormats[TextureTypes.RGB8] = {
+    internalFormat: gl.RGB8,
+    format: gl.RGB,
+    type: gl.UNSIGNED_BYTE
+};
+
+textureFormats[TextureTypes.RGB16F] = {
+    internalFormat: gl.RGB16F,
+    format: gl.RGB,
+    type: gl.HALF_FLOAT
+};
+
+textureFormats[TextureTypes.RGBA32F] = {
+    internalFormat: gl.RGBA32F,
+    format: gl.RGBA,
+    type: gl.FLOAT
+};
+
+textureFormats[TextureTypes.R16F] = {
+    internalFormat: gl.R16F,
+    format: gl.RED,
+    type: gl.HALF_FLOAT
+};
+
+textureFormats[TextureTypes.RG16F] = {
+    internalFormat: gl.RG16F,
+    format: gl.RG,
+    type: gl.HALF_FLOAT
+};
+
+textureFormats[TextureTypes.RGBA] = {
+    internalFormat: gl.RGBA,
+    format: gl.RGBA,
+    type: gl.UNSIGNED_BYTE
+};
+
+textureFormats[TextureTypes.RGB8UI] = {
+    internalFormat: gl.RGB8UI,
+    format: gl.RGB_INTEGER,
+    type: gl.UNSIGNED_BYTE
+};
+
+textureFormats[TextureTypes.RGBA8UI] = {
+    internalFormat: gl.RGBA8UI,
+    format: gl.RGBA_INTEGER,
+    type: gl.UNSIGNED_BYTE
+};
+```
+
+
+
 ## New GLSL 3.00 ES Shader
 
-And here comes our new shader: GLSL 3.00 ES! 
-TODO: test if we can still use GLSL 1.00 with a WebGL-2 context
+And here comes our new shader: GLSL 3.00 ES! This new version brings in a bunch of new features 
+that are not in GLSL 1.00! But the grammar is changed at some point, so it can be quite suffering 
+at the beginning. 
 
-* A list of tiny features (optional)
-    - Layout qualifiers
-    - Vertex texture
-    - Non sqaure matrix
-    - flat/smooth interpolators
-    - centroid
-    - Fragment discard
-    - New built-in functions
-    - Texture Grad
-    - ...
+Note that a shader in GLSL 1.00 is still fully supported in a WebGL 2 context. It's only the GLSL 3.00 ES grammar that 
+doesn't have a backwards compatibility with GLSL 1.00 one. 
+And Only when a `#version 300 es` tag added at the top of the shaders will the GLSL 3.00 ES version turned on. 
+
+We will simply list a bunch of new features and new built-in functions in GLSL 3.00 ES below. 
+
+* Layout qualifiers
+
+Vertex shader inputs can now be declared with layout qualifiers to explicitly bind the location 
+in the shader source without requiring making `gl.getAttribLocation` calls, like this: 
+
+```GLSL
+#version 300 es
+#define POSITION_LOCATION 0
+#define TEXCOORD_LOCATION 4
+// ...
+layout(location = POSITION_LOCATION) in vec2 position;
+layout(location = TEXCOORD_LOCATION) in vec2 texcoord;
+```
+
+```javascript
+var vertexPosLocation = 0; // set with GLSL layout qualifier
+gl.enableVertexAttribArray(vertexPosLocation);
+gl.bindBuffer(gl.ARRAY_BUFFER, vertexPosBuffer);
+gl.vertexAttribPointer(vertexPosLocation, 2, gl.FLOAT, false, 0, 0);
+gl.bindBuffer(gl.ARRAY_BUFFER, null);
+
+var vertexTexLocation = 4; // set with GLSL layout qualifier
+gl.enableVertexAttribArray(vertexTexLocation);
+gl.bindBuffer(gl.ARRAY_BUFFER, vertexTexBuffer);
+gl.vertexAttribPointer(vertexTexLocation, 2, gl.FLOAT, false, 0, 0);
+gl.bindBuffer(gl.ARRAY_BUFFER, null);
+```
+
+The same applies to fragment shader outputs. Layout qualifiers can also be used to control the 
+memory layout for uniform blocks. 
+
+* Non sqaure matrix
+
+Quite straight forward. One use case is replace a 4x4 affine matrix where the last row is (0, 0, 0, 1) with 
+a 4x3 matrix. 
+
+* Full integer support
+
+Built-in functions can now take integer as input variable. 
+
+* flat/smooth interpolators
+
+We can now explicitly declare `flat` interpolators to have flat shading. 
+
+* Centroid sampling
+
+This is used to avoid rendering artifacts when multisampling. Read [this article](https://www.opengl.org/pipeline/article/vol003_6/) 
+for more detials. And here is a [WebGL 2 Sample of centroid](http://webglsamples.org/WebGL2Samples/#glsl_centroid)
+
+* New built-in functions
+
+Some very handy functions like `textureOffset`, `texelFetch`, `dFdx`, `textureGrad`, `textureLOD`, etc. 
+
+* `gl_InstanceID` and `gl_VertexID`
 
 
-## Texture LOD
-* Texture Network streaming
-* Bias
 
 
 
-## Textures tiny: 
-* ETC2/EAC
-* Integer textures
-* Non-Power-of-Two Texture
-    * 2D Sprite
-* Additional Texture Formats
-* sRGB
- 
- ## Primitive restart
+
