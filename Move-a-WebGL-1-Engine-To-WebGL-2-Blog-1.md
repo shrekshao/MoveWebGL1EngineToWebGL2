@@ -6,7 +6,7 @@ Now I have an engine works well in WebGL 1, how am I going to improve that
 to WebGL 2? Things I may wonder:  
 * What has to be changed?
 * What can be done in a better way?
-* What new features can I play with?
+* What new features and functionalities can I add to my engine?
 
 
 # How do I get WebGL 2 working
@@ -160,6 +160,35 @@ gl.framebufferTextureLayer(gl.DRAW_FRAMEBUFFER, gl.COLOR_ATTACHMENT2, texture, 0
 Exposed through the `ANGLE_instanced_arrays` extension at WebGL 1 age (90%+ support). 
 Now we can simply use `drawArraysInstanced` or 
 `drawArraysInstanced` for the draw calls. 
+
+```javascript
+gl.drawArraysInstanced(gl.TRIANGLES, 0, 3, 2);
+```
+
+There is a new built-in variable (GLSL 3.00 ES) in the vertex shader called `gl_InstanceID` which can help 
+with the draw instance call. For example, We can use this to assign each instance with a separate 
+color. 
+
+```GLSL
+// Vertex Shader
+flat out int in instance
+// ...
+void main() {
+    instance = gl_InstanceID;
+}
+```
+
+```GLSL
+// Fragment Shader
+uniform Material {
+    vec4 diffuse[NUM_MATERIALS];
+} material;
+flat in int instance
+// ...
+void main() {
+    color = material.diffuse[instance % NUM_MATERIALS];
+}
+```
 
 Instancing is a great performance booster for certain types of geometry, especially those in 
 a great number but without too many vertices, grass and fur, for example. 

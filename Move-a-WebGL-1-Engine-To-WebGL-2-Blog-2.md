@@ -380,6 +380,9 @@ gl.bindBufferBase(gl.TRANSFORM_FEEDBACK_BUFFER, 0, null);
 
 ## New GLSL 3.00 ES Shader
 
+And here comes our new shader: GLSL 3.00 ES! 
+TODO: test if we can still use GLSL 1.00 with a WebGL-2 context
+
 * A list of tiny features (optional)
     - Layout qualifiers
     - Vertex texture
