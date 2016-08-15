@@ -447,7 +447,7 @@ gl.compressedTexImage2D(
 
 * A set of additional texture formats
 
-```
+```javascript
 textureFormats[TextureTypes.RGB] = {
     internalFormat: gl.RGB,
     format: gl.RGB,
