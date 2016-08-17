@@ -198,25 +198,60 @@ a great number but without too many vertices, grass and fur, for example.
 
 ## Vertex Array Object 
 
-TODO: more to do with engine design optimization
+Exposed through the `OES_vertex_array_object` extension in WebGL 1 (89%). 
+VAO is very useful in terms of engine design. 
+It allows us to store vertex array states for a set of buffers in a single, easy to manage object. 
 
+| WebGL 1 with extension | WebGL 2 |
+|------------|------------|
+|`createVertexArrayOES`|`createVertexArray`|
+|`deleteVertexArrayOES`|`deleteVertexArray`|
+|`isVertexArrayOES`|`isVertexArray`|
+|`bindVertexArrayOES`|`bindVertexArray`|
+
+An example: 
+
+```javascript
+var vertexArray = gl.createVertexArray();
+gl.bindVertexArray(vertexArray);
+
+// set vertex array states
+var vertexPosLocation = 0; // set with GLSL layout qualifier
+gl.enableVertexAttribArray(vertexPosLocation);
+gl.bindBuffer(gl.ARRAY_BUFFER, vertexPosBuffer);
+gl.vertexAttribPointer(vertexPosLocation, 2, gl.FLOAT, false, 0, 0);
+gl.bindBuffer(gl.ARRAY_BUFFER, null);
+// ...
+
+gl.bindVertexArray(null);
+
+// ...
+
+// render
+gl.bindVertexArray(vertexArray);
+gl.drawArrays(gl.TRIANGLES, 0, 6);
+```
 
 
 ## Fragment Depth
 
 Exposed through the `EXT_frag_depth` extension in WebGL 1 (66%). 
 
-TODO: no practice yet
+The fragment shader can explicitly control the depth value for the current fragment. 
 
->Lets you manipulate the depth of a fragment from the fragment shader. 
-This can be expensive because it forces the GPU to bypass a lot of it's normal fragment discard behavior, but can also allow for some interesting effects that would be difficult to accomplish without having incredibly high poly geometry.
+This can be expensive because it forces the GPU to bypass a lot of it's normal fragment discard behavior. 
+But may be useful with some case when there's high poly geometry.
 
+```GLSL
+out float gl_FragDepth;
+``` 
+ More details can be found in [GLSL 3.00 ES Spec](https://www.khronos.org/registry/gles/specs/3.0/GLSL_ES_Specification_3.00.4.pdf). 
 
 
 
 # Other compatibility issues
 
-
+Check here: [WebGL 2 Spec Ch4.1](https://www.khronos.org/registry/webgl/specs/latest/2.0/#4.1)
 
 
 
@@ -226,6 +261,7 @@ This can be expensive because it forces the GPU to bypass a lot of it's normal f
 * Hongwei Li https://zhuanlan.zhihu.com/p/19957067?refer=webgl 
 * WebGL 2 Spec https://www.khronos.org/registry/webgl/specs/latest/2.0/ 
 * OpenGL ES 3 Spec https://www.khronos.org/registry/gles/specs/3.0/es_spec_3.0.0.pdf
+* OpenGL ES 3 Programming Guide http://1.droppdf.com/files/v4voM/addison-wesley-opengl-es-3-0-programming-guide-2nd-2014.pdf
 * http://gamedev.stackexchange.com/questions/9668/what-are-3d-textures
 * http://www.gamedev.net/topic/655969-speed-gluniform-vs-uniform-buffer-objects/ 
 * Sijie Tian https://hacks.mozilla.org/2014/01/webgl-deferred-shading/
