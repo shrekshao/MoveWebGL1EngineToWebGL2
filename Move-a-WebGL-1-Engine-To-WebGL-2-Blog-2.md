@@ -20,13 +20,42 @@ WebGL as other platform.
 var colorRenderbuffer = gl.createRenderbuffer();
 gl.bindRenderbuffer(gl.RENDERBUFFER, colorRenderbuffer);
 gl.renderbufferStorageMultisample(gl.RENDERBUFFER, 4, gl.RGBA8, FRAMEBUFFER_SIZE.x, FRAMEBUFFER_SIZE.y);
+
+gl.bindFramebuffer(gl.FRAMEBUFFER, framebuffers[FRAMEBUFFER.RENDERBUFFER]);
+gl.framebufferRenderbuffer(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.RENDERBUFFER, colorRenderbuffer);
+gl.bindFramebuffer(gl.FRAMEBUFFER, null);
 ```
 
-Bind a Texture to a framebuffer, and use `blitFramebuffer` ... TODO: test if the setup in webgl2 sample pack is minimal
+Pay attention that the multisample renderbuffers cannot be directly bound to textures, 
+but they can be resolved to single-sample textures bind to a 
+using the `blitFramebuffer`, which is a 
+new feature in WebGL 2 as well, like this: 
 
+```javascript
+var texture = gl.createTexture();
+gl.bindTexture(gl.TEXTURE_2D, texture);
+gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
+gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
+gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, FRAMEBUFFER_SIZE.x, FRAMEBUFFER_SIZE.y, 0, gl.RGBA, gl.UNSIGNED_BYTE, null);
+gl.bindTexture(gl.TEXTURE_2D, null);
 
-* Make FBO useful
-* post processing freed from rendering pipeline
+gl.bindFramebuffer(gl.FRAMEBUFFER, framebuffers[FRAMEBUFFER.COLORBUFFER]);
+gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, texture, 0);
+gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+
+// ...
+
+// After drawing to the multisampled renderbuffers
+gl.bindFramebuffer(gl.READ_FRAMEBUFFER, framebuffers[FRAMEBUFFER.RENDERBUFFER]);
+gl.bindFramebuffer(gl.DRAW_FRAMEBUFFER, framebuffers[FRAMEBUFFER.COLORBUFFER]);
+gl.clearBufferfv(gl.COLOR, 0, [0.0, 0.0, 0.0, 1.0]);
+gl.blitFramebuffer(
+    0, 0, FRAMEBUFFER_SIZE.x, FRAMEBUFFER_SIZE.y,
+    0, 0, FRAMEBUFFER_SIZE.x, FRAMEBUFFER_SIZE.y,
+    gl.COLOR_BUFFER_BIT, gl.NEAREST
+);
+```
+
 
 ## 3D Texture
 
@@ -183,14 +212,13 @@ Here we have `vec3`, so our data should add a `0` for each `vec3` for alignment.
 Also, since we use a struct to wrap our data, it should be rounded to a multiply of `vec4`. 
 That's why we have 3 extra zero after the `float shininess`. 
 
+Another concerns is about updating uniform block. There are several different approaches that can get us there. 
+But their performance can vary. It's pretty tricky to make the most of our uniform block. 
 
-Another concerns is about updating Uniform Block. There are several different approaches that can get us there. 
-But their performance can vary. 
+Here are some detailed discussions http://stackoverflow.com/questions/38841124/updating-uniform-buffer-data-in-webgl-2. 
+http://www.gamedev.net/topic/655969-speed-gluniform-vs-uniform-buffer-objects/ . 
 
-TODO: http://www.gamedev.net/topic/655969-speed-gluniform-vs-uniform-buffer-objects/
-
-http://stackoverflow.com/questions/38841124/updating-uniform-buffer-data-in-webgl-2
-
+But basically, we can use `gl.bufferSubData` to copy the updated typedArray into the uniform buffers. 
 
 
 ## Sync Objects
