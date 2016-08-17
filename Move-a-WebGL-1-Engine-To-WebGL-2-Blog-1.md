@@ -1,27 +1,26 @@
-WebGL 2 is now coming! Google Chrome just announced 100% of the WebGL 2 
-conformance Suite is passing* (on the first configurations)
-at SIGGRAPH 2016. 
+WebGL 2 is coming! [Google Chrome just announced](https://www.youtube.com/watch?v=0eWUzCa_M0E&feature=youtu.be&t=66) at SIGGRAPH 2016 that 100% of the WebGL 2 
+conformance Suite is passing (on the first configurations). 
 
-Now I have an engine works well in WebGL 1, how am I going to improve that 
-to WebGL 2? Things I may wonder:  
+Now I have an engine that works well in WebGL 1, how do I move 
+to WebGL 2? Things to consider:  
 * What has to be changed?
 * What can be done in a better way?
 * What new features and functionalities can I add to my engine?
 
 
-# How do I get WebGL 2 working
+# How do I get WebGL 2 working?
 
 ## Get a WebGL 2 Implementation (Browser)
 
-You may have seen this for many times, let's just hit the point
+You may have seen this before, let's just hit the main points:
 * Just do it: [Getting a WebGL Implementation](https://www.khronos.org/webgl/wiki/Getting_a_WebGL_Implementation)
-* Check if your current browser support it: [WebGL Report](https://www.khronos.org/webgl/wiki/Getting_a_WebGL_Implementation)
+* Check if your current browser supports it: [WebGL Report](https://www.khronos.org/webgl/wiki/Getting_a_WebGL_Implementation)
 
 ## Get a WebGL 2 Context
 
 Programmers always try to support as many browsers as possible. So do I. 
-On top the WebGL 1 version of getContext, we will try to access WebGL 2 first. 
-If failed, then just back to WebGL 1 routine. 
+On top the WebGL 1 version of getContext, we will first try to access WebGL 2. 
+If this fail, then drop back to WebGL 1. 
 We use Cesium as an example: 
 
 ```javascript
@@ -31,13 +30,15 @@ var webgl2 = false;
 var glContext;
 
 if (defaultToWebgl2 && webgl2Supported) {
-    glContext = canvas.getContext('webgl2', webglOptions) || canvas.getContext('experimental-webgl2', webglOptions) || undefined;
+    glContext = canvas.getContext('webgl2', webglOptions) || 
+        canvas.getContext('experimental-webgl2', webglOptions) || undefined;
     if (defined(glContext)) {
         webgl2 = true;
     }
 }
 if (!defined(glContext)) {
-    glContext = canvas.getContext('webgl', webglOptions) || canvas.getContext('experimental-webgl', webglOptions) || undefined;
+    glContext = canvas.getContext('webgl', webglOptions) ||
+        canvas.getContext('experimental-webgl', webglOptions) || undefined;
 }
 if (!defined(glContext)) {
     throw new RuntimeError('The browser supports WebGL, but initialization failed.');
@@ -49,20 +50,20 @@ if (!defined(glContext)) {
 
 # Promoted Features
 
-Some of the new features are already available in WebGL 1 as extensions, 
-but will be part of the core spec in WebGL 2, which means support is guaranteed. 
+Some of the new WebGL 2 features are already available in WebGL 1 as extensions. However,
+these features will be part of the core spec in WebGL 2, which means support is guaranteed. 
 In this first blog entry we are going to focus on these promoted features, together with
 potential compatibility issues they may cause. 
 Let’s take a look at how the code changes. 
 
 ## Multiple Render Targets - Deferred Rendering
 
-A big one. 
+MRT is an important extension, so makes a useful example case. 
 
 ### WebGL 1
 
-For MRT, we used `WEBGL_draw_buffers` extension as a work-around to write g-buffers in a single pass. 
-Though it is widely supported (50%+ actually according to webgl stats), the extension-style code doesn’t make us feel good:
+For MRT we used the `WEBGL_draw_buffers` extension as a work-around to write g-buffers in a single pass. 
+Though it is widely supported (57%+ browsers, according to [WebGL stats](http://webglstats.com/)), the extension-style code doesn’t make us feel good:
 
 ```javascript
 var ext = gl.getExtension('WEBGL_draw_buffers');
@@ -123,7 +124,7 @@ gl.framebufferTexture2D(gl.DRAW_FRAMEBUFFER, gl.COLOR_ATTACHMENT2, gl.TEXTURE_2D
 
 Instead of mapping color attachments to the draw buffer, 
 we directly use multiple `out` variables in the fragment shader. 
-This code actually benefits from the new GLSL 3.00 ES, which we will discuss later in detail. 
+This code actually benefits from the new [GLSL 3.0 ES](https://www.khronos.org/registry/gles/specs/3.0/GLSL_ES_Specification_3.00.3.pdf), which we will discuss later in detail. 
 However, using `out` itself is straightforward. 
 
 ```glsl
@@ -157,16 +158,18 @@ gl.framebufferTextureLayer(gl.DRAW_FRAMEBUFFER, gl.COLOR_ATTACHMENT2, texture, 0
 
 ## Instancing
 
-Exposed through the `ANGLE_instanced_arrays` extension at WebGL 1 age (90%+ support). 
-Now we can simply use `drawArraysInstanced` or 
+Instancing is a great performance booster for certain types of geometry, especially objects with many instances but without many vertices. Good examples are grass and fur. Instancing avoids the overhead of an individual API call per object, while minimizing memory costs by avoiding storing geometric data for each separate instance.
+
+Instancing is exposed through the `ANGLE_instanced_arrays` extension in WebGL 1 ([92%+ support](http://webglstats.com/)). 
+Now with WebGL 2 we can simply use `drawArraysInstanced` or 
 `drawArraysInstanced` for the draw calls. 
 
 ```javascript
 gl.drawArraysInstanced(gl.TRIANGLES, 0, 3, 2);
 ```
 
-There is a new built-in variable (GLSL 3.00 ES) in the vertex shader called `gl_InstanceID` which can help 
-with the draw instance call. For example, We can use this to assign each instance with a separate 
+There is a new built-in variable (GLSL 3.0 ES) in the vertex shader called `gl_InstanceID` that can help 
+with the draw instance call. For example, we can use this to assign each instance with a separate 
 color. 
 
 ```GLSL
@@ -190,17 +193,12 @@ void main() {
 }
 ```
 
-Instancing is a great performance booster for certain types of geometry, especially those in 
-a great number but without too many vertices, grass and fur, for example. 
-
-
-
 
 ## Vertex Array Object 
 
-Exposed through the `OES_vertex_array_object` extension in WebGL 1 (89%). 
 VAO is very useful in terms of engine design. 
-It allows us to store vertex array states for a set of buffers in a single, easy to manage object. 
+It allows us to store vertex array states for a set of buffers in a single, easy to manage object. It is exposed through the `OES_vertex_array_object` extension in WebGL 1 ([89%+](http://webglstats.com/)). 
+
 
 | WebGL 1 with extension | WebGL 2 |
 |------------|------------|
@@ -235,23 +233,22 @@ gl.drawArrays(gl.TRIANGLES, 0, 6);
 
 ## Fragment Depth
 
-Exposed through the `EXT_frag_depth` extension in WebGL 1 (66%). 
+The fragment shader can explicitly control the depth value for the current fragment.
+This operation can be expensive because it forces the GPU to bypass its normal early-out fragment discard behavior. 
+However, it is needed in cases where the z-depth is modified on the fly.
 
-The fragment shader can explicitly control the depth value for the current fragment. 
-
-This can be expensive because it forces the GPU to bypass a lot of it's normal fragment discard behavior. 
-But may be useful with some case when there's high poly geometry.
+This functionality is exposed through the `EXT_frag_depth` extension in WebGL 1 ([66%+](http://webglstats.com/)). 
 
 ```GLSL
 out float gl_FragDepth;
 ``` 
- More details can be found in [GLSL 3.00 ES Spec](https://www.khronos.org/registry/gles/specs/3.0/GLSL_ES_Specification_3.00.4.pdf). 
+ More details can be found in the [GLSL 3.0 ES Spec](https://www.khronos.org/registry/gles/specs/3.0/GLSL_ES_Specification_3.00.4.pdf). 
 
 
 
 # Other compatibility issues
 
-Check here: [WebGL 2 Spec Ch4.1](https://www.khronos.org/registry/webgl/specs/latest/2.0/#4.1)
+Look here for more information: [WebGL 2 Spec Ch4.1](https://www.khronos.org/registry/webgl/specs/latest/2.0/#4.1)
 
 
 

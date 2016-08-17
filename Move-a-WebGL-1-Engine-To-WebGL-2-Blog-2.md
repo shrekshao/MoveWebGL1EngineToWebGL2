@@ -1,20 +1,20 @@
-Last time we figure out how to deal with issues porting WebGL 1 engine to WebGL 2. 
+Last time we showed how to deal with issues porting a WebGL 1 engine to WebGL 2. 
 In this article, we will talk about what new features come with WebGL 2 and 
-what cool things can we do with them in our engine. 
+what cool things can we do with them. 
 
 # New features
 
 ## Multisampled Renderbuffers
 
-Previously if we want antialising we would either have to 
+Previously, if we want antialiasing we would either have to 
 render it to the default backbuffer or 
-perform our own post-process AA (like FXAA) on content rendered to a texture.
+perform our own post-process AA (such as FXAA or [SMAA](http://threejs.org/examples/#webgl_postprocessing_smaa)) on content rendered to a texture.
 
-But with Multisampled Renderbuffers, we can now use the general renderring pipeline in 
-WebGL as other platform. 
+Now, with Multisampled Renderbuffers, we can now use the general rendering pipeline in 
+WebGL to provide multisampled antialiasing (MSAA):
 > pre-z pass --> rendering pass to FBO --> postprocessing pass --> render to window
 
-`renderbufferStorageMultisample` is the function directly related here. 
+`renderbufferStorageMultisample` is the relevant function here. 
 
 ```javascript
 var colorRenderbuffer = gl.createRenderbuffer();
@@ -26,10 +26,10 @@ gl.framebufferRenderbuffer(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.RENDERBUFFER
 gl.bindFramebuffer(gl.FRAMEBUFFER, null);
 ```
 
-Pay attention that the multisample renderbuffers cannot be directly bound to textures, 
-but they can be resolved to single-sample textures bind to a 
-using the `blitFramebuffer`, which is a 
-new feature in WebGL 2 as well, like this: 
+Pay attention to the fact that the multisample renderbuffers cannot be directly bound to textures, 
+but they can be resolved to single-sample textures 
+using the `blitFramebuffer` call. This is a 
+new feature in WebGL 2 as well, and is used like this: 
 
 ```javascript
 var texture = gl.createTexture();
@@ -59,16 +59,15 @@ gl.blitFramebuffer(
 
 ## 3D Texture
 
-The first thing come to mind is Volumetric effects, like fire, smoke, light rays, realistic fog, etc. 
+The first thing that comes to mind with 3D textures is volumetric effects, such as fire, smoke, light rays, realistic fog, etc. 
 Now we can bring these features into our WebGL engine. 
-Besides these, 3D texture be applied for Medical science data like MRI, CT scans. 
-It is very useful when implementing cross section. 
-In terms of performance, it can be used to cache light for real-time global illumination. 
+In addition, 3D textures can be used to store medical data such as MRI and CT scans, and are useful when implementing cross-sectioning. 
+3D textures can also improve performance by using them to cache light for real-time global illumination. 
 
-WebGL support for 3D texture is as good as the 2D one. We have fast accessing speed and 
+WebGL 2 support for 3D textures is as good as that for 2D textures. We have fast access speed and 
 native tri-linear interpolation. 
 
-The code for setting up a 3D texture mostly has their 2D texture counterpart. 
+The code for setting up a 3D texture usually has a 2D texture counterpart. 
 
 | Texture 2D | Texture 3D |
 |------------|------------|
@@ -79,10 +78,12 @@ The code for setting up a 3D texture mostly has their 2D texture counterpart.
 |`compressedTexSubImage2D`|`compressedTexSubImage3D`|
 |`texStorage2D`|`texStorage3D`|
 
-There are certain things that do not match exactly. 
-For example, since we have one more dimension we will have `depth`, `zoffset`, `TEXTURE_WRAP_T`
-for 3D texture. Also, the internal formate, format, and type combination is not 100% matched. 
-In addition, the sampler in shaders is now `sampler3D` instead of `sampler2D`. 
+There are certain elements that do not match exactly. 
+For example, since we have one more dimension, we will have `depth`, `zoffset`, and `TEXTURE_WRAP_T`
+for 3D textures. Also, the internal format and type combinations are not 100% matched.
+
+The sampler used in shaders is `sampler3D` instead of `sampler2D`. 
+
 Here's an example setup: 
 
 ```javascript
@@ -111,7 +112,7 @@ gl.generateMipmap(gl.TEXTURE_3D);
 ```
 
 
-Last but not the least, 2D Texture Array is coming together with 3D Texture feature. 
+Last but not the least, the 2D Texture Array concept is available with the 3D Texture feature. That is, multiple 3D textures can be stored in an array that can be accessed.
 It has its own sampler: `sampler2DArray`, but it shares the `texImage3D` GL functions. 
 Here's an example call: 
 
@@ -134,18 +135,18 @@ gl.texImage3D(
 
 ## Uniform Buffer
 
-Setting uniform for shaders is a huge part of engine task. Take the [Cesium Globe](http://cesiumjs.org/Cesium/Build/Apps/CesiumViewer/index.html)
-as an example. For regular draw calls, `uniform4fv` is within the top 5 GL functions take the most executing time. 
-And sum of all `uniform[i]fv` and `uniformMatrix[i]fv` calls is nearly 2.5% of all execution time. 
+Setting uniforms for shaders is often a considerable amount of the time spent by an engine. Take the [Cesium Globe](http://cesiumjs.org/Cesium/Build/Apps/CesiumViewer/index.html)
+as an example. For regular draw calls, `uniform4fv` is within the top 5 GL functions taking the most execution time. 
+Also, the sum of all `uniform[i]fv` and `uniformMatrix[i]fv` calls is nearly 2.5% of all execution time. 
 That's quite a large percentage. We always have to call them to update uniform values each frame. 
-What's more, it can be really annoying that we have to make duplicated uniform calls for one same uniform object shared by several shaders.  
+What's more, it can be annoying that we have to make duplicated uniform calls for one same uniform object shared by several shaders.  
 
-Now Uniform buffer object may bring us a boost on performance allowing us to store blocks of uniforms 
+Now the Uniform buffer object may bring us a boost in performance by allowing us to store blocks of uniforms 
 in buffers stored on the GPU, just like vertex/index buffers.  
 This can make switching between sets of uniforms faster. 
 Additionally, uniform buffers can be shared by multiple programs at the same time. 
 
-That's quite a lot benefits. But with so many improvements, the setup routine is about to 
+That's quite a few benefits. But, with so many improvements, the setup routine is about to 
 change a lot. We will have a basic setup example first, and then look at something that 
 might need your attention. 
 
@@ -168,15 +169,15 @@ gl.bindBuffer(gl.UNIFORM_BUFFER, null);
 gl.bindBufferBase(gl.UNIFORM_BUFFER, 2, uniformPerSceneBuffer);
 ```
 
-The first thing that may confuse you is the layout standard (We will focus on std140 here). You can always find the 
+The first thing that may confuse you is the layout standard (we will focus on std140 here). You can always find the 
 details in [OpenGL ES 3.00 Spec](https://www.khronos.org/registry/gles/specs/3.0/es_spec_3.0.0.pdf) Page 68. 
 
-One thing that I really want to get your notice is 
+One thing that I really want you to notice is:
 
 >when the data member is a three-component vector with components consuming N
 basic machine units, the base alignment is 4N
 
-And
+And:
 
 >If the member is a structure, the base alignment of the structure is N, where
 N is the largest base alignment value of any of its members, and rounded
@@ -209,16 +210,16 @@ var material = new Float32Array([
 ```
 
 Here we have `vec3`, so our data should add a `0` for each `vec3` for alignment. 
-Also, since we use a struct to wrap our data, it should be rounded to a multiply of `vec4`. 
-That's why we have 3 extra zero after the `float shininess`. 
+Also, since we use a struct to wrap our data, it should be rounded to a multiple of `vec4`. 
+That's why we have 3 extra zeroes after the `float shininess`. 
 
-Another concerns is about updating uniform block. There are several different approaches that can get us there. 
-But their performance can vary. It's pretty tricky to make the most of our uniform block. 
+Another concern is about updating the uniform block. There are several different approaches that can get us there. 
+However, their performance can vary. It's pretty tricky to make the most of our uniform block. 
 
-Here are some detailed discussions http://stackoverflow.com/questions/38841124/updating-uniform-buffer-data-in-webgl-2. 
-http://www.gamedev.net/topic/655969-speed-gluniform-vs-uniform-buffer-objects/ . 
+Here are some detailed discussions on [Stack Overflow](http://stackoverflow.com/questions/38841124/updating-uniform-buffer-data-in-webgl-2.) and [gamedev.net](
+http://www.gamedev.net/topic/655969-speed-gluniform-vs-uniform-buffer-objects/). 
 
-But basically, we can use `gl.bufferSubData` to copy the updated typedArray into the uniform buffers. 
+But, basically, we can use `gl.bufferSubData` to copy the updated typedArray into the uniform buffers. 
 
 
 ## Sync Objects
@@ -227,20 +228,20 @@ Sync objects can be used to synchronize execution between the GL server and the 
 gives you more control over GPU by letting you set a fence to inform the GPU to wait until a set of 
 GL operations have finished. Sync objects are more efficient than `gl.finish`. 
 
-We can get more accurate benchmarks with sync objects. In addition, applications like image 
-manipulation where data of each frame comes from CPU will be benefitted with this degree of 
+We can get more accurate benchmarks with sync objects. In addition, applications such as image 
+manipulation, where data of each frame comes from the CPU, will benefit from this degree of 
 control. 
 
 
 ## Query Objects
 
-This is very useful when we want to do occulsion testing. 
-We can know how many geometries are actually drawn by erforming 
+This operation is very useful when we want to do occlusion testing. 
+We can know how many geometries are actually drawn by performing 
 a `gl.ANY_SAMPLES_PASSED` query around a set of draw calls. 
-We can get rid of those picking method now. 
+We can use these queries and so get rid of specialized picking method code. 
 
-Keep in mind that these queries are asychronous. A query's result is never available 
-in the same frame the query is issued. 
+Keep in mind that these queries are asynchronous. A query's result is never available 
+in the same frame that the query is issued. 
 
 ```javascript
 gl.beginQuery(gl.ANY_SAMPLES_PASSED, query);
@@ -267,10 +268,10 @@ gl.endQuery(gl.ANY_SAMPLES_PASSED);
 ## Sampler Objects
 
 In WebGL 1 texture image data and sampling information (which tells GPU how to read the image data) 
-are both stored in texture object. It can be annoying when we want to read from the same texture twice 
-but with different method (say, linear filtering vs nearest filtering) because we should have 
-two texture objects. But with sampler objects, we can separate these two concepts. We can have one 
-texture object and two different sampler objects. It will be a change in how our engine organize 
+are both stored in texture objects. It can be annoying when we want to read from the same texture twice 
+but with a different method (say, linear filtering vs nearest filtering) because we need to have 
+two texture objects. But, with sampler objects, we can separate these two concepts. We can have one 
+texture object and two different sampler objects. This will result in a change in how our engine organize 
 textures.  
 Here's an example: 
 
@@ -302,12 +303,12 @@ gl.bindSampler(1, samplerB);
 ## Transform Feedback
 
 Transform feedback allows the output of the vertex shader to be captured in a buffer object. 
-This is useful for things like particle system and simulation that perform on GPU without 
+This is useful for particle systems and simulation that perform on the GPU without 
 any CPU intervention. 
 
 In WebGL 1, when we want to implement such feature, usually a texture 
-storing the states of particles is inevitable. (Two textures to be precise, 
-storing states from previous frame and current frame, and ping-pong between them)
+storing the states of particles is inevitable. Two textures, to be precise, 
+storing states from previous frame and current frame, and ping-pong between them.
 
 Here's an example of WebGL 1 approach (from [toji's WebGL Particle](https://github.com/toji/webgl2-particles))
 
@@ -336,8 +337,9 @@ void main() {
 ```
 
 And then we use this position texture as an input for our second pass vertex shader.
-// Second pass - Vertex Shader
+
 ```GLSL
+// Second pass - Vertex Shader
 attribute vec3 position;
 uniform float pointSize;
 uniform sampler2D map;
@@ -353,10 +355,10 @@ void main() {
 }
 ``` 
 
-This is how we do in WebGL 2. With Transform feedback, we can discard the fragment shader 
-in step 1 and the texture now. We write the output (position) of the vertex shader in step 1 to the 
-vertex attribute array input of step 2. (Actually, you still need a placeholder trivial fragment shader 
-for the first step to correctly compile the program)
+This is how we do it in WebGL 2. With Transform feedback, we can discard the fragment shader 
+in step 1, as well as the texture. We write the output (position) of the vertex shader in step 1 to the 
+vertex attribute array input of step 2. (In practice, you still need a placeholder trivial fragment shader 
+for the first step to correctly compile the program.)
 
 
 ```GLSL
@@ -378,7 +380,7 @@ void main() {
 }
 ```
 
-And here's how we bind the buffers (from [WebGL2SamplesPack](https://github.com/WebGLSamples/WebGL2Samples))
+And here's how we bind the buffers (from [WebGL2SamplesPack](https://github.com/WebGLSamples/WebGL2Samples)):
 
 ```javascript
 var transformFeedback = gl.createTransformFeedback();
@@ -404,7 +406,7 @@ gl.bindBufferBase(gl.TRANSFORM_FEEDBACK_BUFFER, 0, null);
 
 ## A set of texture new features:
 
-Here is a list of new texture features. 
+Here is a list of the new texture features in WebGL 2. 
 
 * sRGB textures
 Allow the application to perform gamma-correct rendering. 
@@ -420,7 +422,7 @@ gl.texImage2D(
 );
 ```
 
-Note that sRGB texture will be automatically converted to linear space upon being fetched in the shader. 
+The sRGB texture will be automatically converted to linear space when being fetched in the shader. For physically-based rendering and other operations we normally want to deal with colors in a linear space, not a display space.
 
 
 * Vertex texture
@@ -431,17 +433,17 @@ Note that sRGB texture will be automatically converted to linear space upon bein
 * Texture LOD 
 
 The texture LOD parameter
-used to determine which mipmap to fetch from can now be
-clamped. And the base and maximum mipmap level can
-be clamped. This allows mipmap streaming, which is very useful for WebGL environment, 
-where textures are downloaded via network. 
+is used to determine which mipmap to fetch from; it can now be
+clamped. The base and maximum mipmap level can both
+be set as clamps. This allows mipmap streaming, i.e., loading only the mipmap levels currently needed. This is very useful for a WebGL environment, 
+where textures are downloaded via a network. 
 
 ```javascript
 gl.texParameterf(gl.TEXTURE_2D, gl.TEXTURE_MIN_LOD, 0.0);
 gl.texParameterf(gl.TEXTURE_2D, gl.TEXTURE_MAX_LOD, 10.0);
 ```
 
-Additionally, the LOD Bias in shader makes mipmap level control possible in physically based rendering. 
+Additionally, the LOD Bias in the shader makes mipmap level control simpler for glossy environment effects in physically based rendering. 
 
 ```GLSL
 color = texture(diffuse, v_st, lodBias);
@@ -449,7 +451,7 @@ color = texture(diffuse, v_st, lodBias);
 
 * ETC2/EAC texture compression
 
-A mandatory support. 
+A mandatory supported feature, compressed textures have obvious transmission time savings. 
 
 ```javascript
 gl.compressedTexImage2D(
@@ -536,14 +538,14 @@ textureFormats[TextureTypes.RGBA8UI] = {
 ## New GLSL 3.00 ES Shader
 
 And here comes our new shader: GLSL 3.00 ES! This new version brings in a bunch of new features 
-that are not in GLSL 1.00! But the grammar is changed at some point, so it can be quite suffering 
-at the beginning. 
+that are not in GLSL 1.00. But the grammar changed at some point, so it can be quite painful converting over 
+at the start. 
 
 Note that a shader in GLSL 1.00 is still fully supported in a WebGL 2 context. It's only the GLSL 3.00 ES grammar that 
-doesn't have a backwards compatibility with GLSL 1.00 one. 
-And Only when a `#version 300 es` tag added at the top of the shaders will the GLSL 3.00 ES version turned on. 
+doesn't have backwards compatibility with GLSL 1.00. 
+Only when a `#version 300 es` tag is added at the top of the shaders will the GLSL 3.00 ES version turned on. 
 
-We will simply list a bunch of new features and new built-in functions in GLSL 3.00 ES below. 
+We will quickly list here a bunch of new features and new built-in functions in GLSL 3.00 ES. 
 
 * Layout qualifiers
 
@@ -576,29 +578,31 @@ gl.bindBuffer(gl.ARRAY_BUFFER, null);
 The same applies to fragment shader outputs. Layout qualifiers can also be used to control the 
 memory layout for uniform blocks. 
 
-* Non sqaure matrix
+* Non-square matrix
 
-Quite straight forward. One use case is replace a 4x4 affine matrix where the last row is (0, 0, 0, 1) with 
+Quite straightforward. One use case is replace a 4x4 affine matrix where the last row is (0, 0, 0, 1) with 
 a 4x3 matrix. 
 
 * Full integer support
 
 Built-in functions can now take integer as input variable. 
 
-* flat/smooth interpolators
+* Flat/smooth interpolators
 
 We can now explicitly declare `flat` interpolators to have flat shading. 
 
 * Centroid sampling
 
 This is used to avoid rendering artifacts when multisampling. Read [this article](https://www.opengl.org/pipeline/article/vol003_6/) 
-for more detials. And here is a [WebGL 2 Sample of centroid](http://webglsamples.org/WebGL2Samples/#glsl_centroid)
+for more details. Here is a [WebGL 2 Sample of centroid sampling](http://webglsamples.org/WebGL2Samples/#glsl_centroid).
 
 * New built-in functions
 
-Some very handy functions like `textureOffset`, `texelFetch`, `dFdx`, `textureGrad`, `textureLOD`, etc. 
+Some very handy functions such as `textureOffset`, `texelFetch`, `dFdx`, `textureGrad`, `textureLOD`, etc. 
 
 * `gl_InstanceID` and `gl_VertexID`
+
+These allow identification of instances and vertices within the shader.
 
 
 
