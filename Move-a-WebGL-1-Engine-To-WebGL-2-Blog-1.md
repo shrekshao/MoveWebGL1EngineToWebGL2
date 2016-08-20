@@ -1,47 +1,47 @@
 WebGL 2 is coming! [Google Chrome just announced](https://www.youtube.com/watch?v=0eWUzCa_M0E&feature=youtu.be&t=66) at SIGGRAPH 2016 that 100% of the WebGL 2 
 conformance Suite is passing (on the first configurations). 
 
-Now I have an engine that works well in WebGL 1, how do I move 
+If I have an engine that works well in WebGL 1, how do I move 
 to WebGL 2? Things to consider:  
 * What has to be changed?
 * What can be done in a better way?
 * What new features and functionalities can I add to my engine?
 
 
-# How do I get WebGL 2 working?
+# How do I start using WebGL 2?
 
 ## Get a WebGL 2 Implementation (Browser)
 
 You may have seen this before, let's just hit the main points:
 * Just do it: [Getting a WebGL Implementation](https://www.khronos.org/webgl/wiki/Getting_a_WebGL_Implementation)
-* Check if your current browser supports it: [WebGL Report](https://www.khronos.org/webgl/wiki/Getting_a_WebGL_Implementation)
+* Check if your current browser supports it; see the WebGL 2 tab of the [WebGL Report](https://www.khronos.org/webgl/wiki/Getting_a_WebGL_Implementation)
 
 ## Get a WebGL 2 Context
 
 Programmers always try to support as many browsers as possible. So do I. 
 On top the WebGL 1 version of getContext, we will first try to access WebGL 2. 
-If this fail, then drop back to WebGL 1. 
-We use Cesium as an example: 
+If this fails, then drop back to WebGL 1. 
+Here's an example dervived from the Cesium WebGL engine: 
 
 ```javascript
 var defaultToWebgl2 = false;
+
 var webgl2Supported = (typeof WebGL2RenderingContext !== 'undefined');
 var webgl2 = false;
-var glContext;
+var gl;
 
 if (defaultToWebgl2 && webgl2Supported) {
-    glContext = canvas.getContext('webgl2', webglOptions) || 
-        canvas.getContext('experimental-webgl2', webglOptions) || undefined;
-    if (defined(glContext)) {
+    gl = canvas.getContext('webgl2', webglOptions) || 
+        canvas.getContext('experimental-webgl2', webglOptions);
+    if (gl) {
         webgl2 = true;
     }
 }
-if (!defined(glContext)) {
-    glContext = canvas.getContext('webgl', webglOptions) ||
-        canvas.getContext('experimental-webgl', webglOptions) || undefined;
+if (!gl) {
+    gl = canvas.getContext('webgl', webglOptions);
 }
-if (!defined(glContext)) {
-    throw new RuntimeError('The browser supports WebGL, but initialization failed.');
+if (!gl) {
+    throw new Error('The browser supports WebGL, but initialization failed.');
 }
 ```
 
@@ -56,14 +56,14 @@ In this first blog entry we are going to focus on these promoted features, toget
 potential compatibility issues they may cause. 
 Let’s take a look at how the code changes. 
 
-## Multiple Render Targets - Deferred Rendering
+## Multiple Render Targets
 
-MRT is an important extension, so makes a useful example case. 
+MRT is a commonly used extension for deferred rendering, OIT, single-pass picking, etc. 
 
 ### WebGL 1
 
 For MRT we used the `WEBGL_draw_buffers` extension as a work-around to write g-buffers in a single pass. 
-Though it is widely supported (57%+ browsers, according to [WebGL stats](http://webglstats.com/)), the extension-style code doesn’t make us feel good:
+Though it is widely supported (currently 57%+ browsers, according to [WebGL stats](http://webglstats.com/)), the extension-style code isn't as clean as WebGL 2:
 
 ```javascript
 var ext = gl.getExtension('WEBGL_draw_buffers');
@@ -124,7 +124,7 @@ gl.framebufferTexture2D(gl.DRAW_FRAMEBUFFER, gl.COLOR_ATTACHMENT2, gl.TEXTURE_2D
 
 Instead of mapping color attachments to the draw buffer, 
 we directly use multiple `out` variables in the fragment shader. 
-This code actually benefits from the new [GLSL 3.0 ES](https://www.khronos.org/registry/gles/specs/3.0/GLSL_ES_Specification_3.00.3.pdf), which we will discuss later in detail. 
+This code actually benefits from the new [GLSL 3.0 ES](https://www.khronos.org/registry/gles/specs/3.0/GLSL_ES_Specification_3.00.3.pdf), which we will discuss later in another blog post. 
 However, using `out` itself is straightforward. 
 
 ```glsl
@@ -233,8 +233,8 @@ gl.drawArrays(gl.TRIANGLES, 0, 6);
 
 ## Fragment Depth
 
-The fragment shader can explicitly control the depth value for the current fragment.
-This operation can be expensive because it forces the GPU to bypass its normal early-out fragment discard behavior. 
+The fragment shader can explicitly set the depth value for the current fragment.
+This operation can be expensive because it can force disable early-z optimizations. 
 However, it is needed in cases where the z-depth is modified on the fly.
 
 This functionality is exposed through the `EXT_frag_depth` extension in WebGL 1 ([66%+](http://webglstats.com/)). 
