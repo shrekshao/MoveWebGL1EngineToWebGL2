@@ -30,15 +30,13 @@ var webgl2 = false;
 var glContext;
 
 if (defaultToWebgl2 && webgl2Supported) {
-    glContext = canvas.getContext('webgl2', webglOptions) || 
-        canvas.getContext('experimental-webgl2', webglOptions) || undefined;
+    glContext = canvas.getContext('webgl2', webglOptions) || undefined;
     if (defined(glContext)) {
         webgl2 = true;
     }
 }
 if (!defined(glContext)) {
-    glContext = canvas.getContext('webgl', webglOptions) ||
-        canvas.getContext('experimental-webgl', webglOptions) || undefined;
+    glContext = canvas.getContext('webgl', webglOptions) || undefined;
 }
 if (!defined(glContext)) {
     throw new RuntimeError('The browser supports WebGL, but initialization failed.');
