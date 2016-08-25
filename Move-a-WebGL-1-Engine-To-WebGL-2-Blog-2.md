@@ -443,12 +443,6 @@ gl.texParameterf(gl.TEXTURE_2D, gl.TEXTURE_MIN_LOD, 0.0);
 gl.texParameterf(gl.TEXTURE_2D, gl.TEXTURE_MAX_LOD, 10.0);
 ```
 
-Additionally, the LOD Bias in the shader makes mipmap level control simpler for glossy environment effects in physically based rendering. 
-
-```GLSL
-color = texture(diffuse, v_st, lodBias);
-```
-
 * ETC2/EAC texture compression
 
 A mandatory supported feature, compressed textures have obvious transmission time savings. 

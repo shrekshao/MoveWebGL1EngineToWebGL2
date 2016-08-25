@@ -195,7 +195,8 @@ void main() {
 ## Vertex Array Object 
 
 VAO is very useful in terms of engine design. 
-It allows us to store vertex array states for a set of buffers in a single, easy to manage object. It is exposed through the `OES_vertex_array_object` extension in WebGL 1 ([89%+](http://webglstats.com/)). 
+It allows us to store vertex array states for a set of buffers in a single, easy to manage object. 
+It is exposed through the `OES_vertex_array_object` extension in WebGL 1 ([89%+](http://webglstats.com/)). 
 
 
 | WebGL 1 with extension | WebGL 2 |
@@ -227,6 +228,26 @@ gl.bindVertexArray(null);
 gl.bindVertexArray(vertexArray);
 gl.drawArrays(gl.TRIANGLES, 0, 6);
 ```
+
+
+## Shader Texture LOD
+
+Ken
+> Highlight a bit more the promotion of https://www.khronos.org/registry/webgl/extensions/EXT_shader_texture_lod/ to core. This shader language feature is really important for physically based rendering.
+
+The Shader Texture LOD Bias control makes mipmap level control simpler for glossy environment effects in physically based rendering. 
+This functionality is exposed through the [`EXT_shader_texture_lod`](https://www.khronos.org/registry/webgl/extensions/EXT_shader_texture_lod/) extension in WebGL 1 ([71%+](http://webglstats.com/)).
+
+```GLSL
+vec4 texture2DLodEXT(sampler2D sampler, vec2 coord, float lod)
+```
+
+Now as part of core, the lodBias can be passed as an optional parameter to `texture` 
+
+```GLSL
+gvec4 texture (gsampler2D sampler, vec2 P [, float bias] )
+```
+
 
 
 ## Fragment Depth
