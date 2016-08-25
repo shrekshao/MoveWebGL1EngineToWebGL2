@@ -14,7 +14,7 @@ compatibility issues. You can get an idea about the code that has to be changed 
 You can find answers to the other two questions in our next article, focusing on introducting new features. 
 
 Besides, you may want some complete working sample code for reference instead of just code snippets some time. 
-[WebGL 2 Samples pack](https://github.com/WebGLSamples/WebGL2Samples) is a something you will find useful. 
+[**WebGL 2 Samples pack**](https://github.com/WebGLSamples/WebGL2Samples) is a something you will find useful. 
 
 That's enough for an intro. First of all, let's get WebGL 2 working on your machine. 
 
@@ -60,7 +60,27 @@ Some of the new WebGL 2 features are already available in WebGL 1 as extensions.
 these features will be part of the core spec in WebGL 2, which means support is guaranteed. 
 In this first blog entry we are going to focus on these promoted features, together with
 potential compatibility issues they may cause. 
-Let’s take a look at how the code changes. 
+
+First let's find if there's a way to change fewest existing WebGL 1 code using the extension 
+to make it work correctly with WebGL 2 context. 
+
+We may find that in some cases (instancing and VAO), it's only the function we are calling changes from the extension version to core version, 
+while the pipeline doesn't change. We used to call `fooEXT`, now we simply switched to `foo`. 
+
+Thanks for Javascript neat support of function object, one solution can be that we create 
+a function handler at startup, assigned with either the extension version from WebGL 1 or the core version from WebGL 2. 
+And for the rest of the code we call this function handler.
+
+```javascript
+if (!webgl2) {
+    gl.createVertexArray = ext.createVerteXArrayOES;    // TODO: check the extension page when has network
+    //...
+}
+```
+Yet this method can fail when changes are made in the shader (MRT). 
+
+
+Now Let’s take a look at how the code changes for each of these features. 
 
 ## Multiple Render Targets - Deferred Rendering
 
@@ -239,9 +259,6 @@ gl.drawArrays(gl.TRIANGLES, 0, 6);
 
 
 ## Shader Texture LOD
-
-Ken
-> Highlight a bit more the promotion of https://www.khronos.org/registry/webgl/extensions/EXT_shader_texture_lod/ to core. This shader language feature is really important for physically based rendering.
 
 The Shader Texture LOD Bias control makes mipmap level control simpler for glossy environment effects in physically based rendering. 
 This functionality is exposed through the [`EXT_shader_texture_lod`](https://www.khronos.org/registry/webgl/extensions/EXT_shader_texture_lod/) extension in WebGL 1 ([71%+](http://webglstats.com/)).
