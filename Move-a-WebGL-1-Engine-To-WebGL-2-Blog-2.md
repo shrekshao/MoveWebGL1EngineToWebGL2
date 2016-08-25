@@ -475,6 +475,10 @@ gl.compressedTexImage2D(
     - half-float: High dynamic range imaging
     - full-float: Variance shadow maps soft shadow
 
+    - a feature coming together with **floating point texture** is **floating point renderbuffer** (also with multisample support).
+
+
+
 * Seamless cube map
 
 Cube map is already available in WebGL 1. What's new in WebGL 2 is that the cube map is 
