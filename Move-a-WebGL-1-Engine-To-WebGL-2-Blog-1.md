@@ -7,6 +7,16 @@ to WebGL 2? Things to consider:
 * What can be done in a better way?
 * What new features and functionalities can I add to my engine?
 
+In this article, we are focusing on the main promoted features, which are supported by extensions in WebGL 1 that 
+are part of the core of WebGL 2 thus cannot be accessed in the old manner, together with some other 
+compatibility issues. You can get an idea about the code that has to be changed in this article. 
+
+You can find answers to the other two questions in our next article, focusing on introducting new features. 
+
+Besides, you may want some complete working sample code for reference instead of just code snippets some time. 
+[WebGL 2 Samples pack](https://github.com/WebGLSamples/WebGL2Samples) is a something you will find useful. 
+
+That's enough for an intro. First of all, let's get WebGL 2 working on your machine. 
 
 # How do I get WebGL 2 working?
 
