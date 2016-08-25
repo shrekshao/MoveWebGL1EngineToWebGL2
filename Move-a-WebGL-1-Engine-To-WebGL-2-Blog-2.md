@@ -310,7 +310,7 @@ In WebGL 1, when we want to implement such feature, usually a texture
 storing the states of particles is inevitable. Two textures, to be precise, 
 storing states from previous frame and current frame, and ping-pong between them.
 
-Here's an example of WebGL 1 approach (from [toji's WebGL Particle](https://github.com/toji/webgl2-particles))
+Here's an example of WebGL 1 approach (from [toji's WebGL Particles take 2](https://github.com/toji/webgl2-particles-2))
 
 In the first pass fragment shader, 
 do the simulation, and store the position results in a texture. 
