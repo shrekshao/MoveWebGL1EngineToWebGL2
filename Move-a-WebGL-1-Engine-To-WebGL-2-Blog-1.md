@@ -54,8 +54,6 @@ if (!defined(glContext)) {
 ```
 
 
-
-
 # Promoted Features
 
 Some of the new WebGL 2 features are already available in WebGL 1 as extensions. However,
@@ -194,7 +192,7 @@ void main() {
 uniform Material {
     vec4 diffuse[NUM_MATERIALS];
 } material;
-flat in int instance
+flat in int instance;   // `flat` is a must for a int varying, plus we don't want the instance id to be interpolated
 // ...
 void main() {
     color = material.diffuse[instance % NUM_MATERIALS];
