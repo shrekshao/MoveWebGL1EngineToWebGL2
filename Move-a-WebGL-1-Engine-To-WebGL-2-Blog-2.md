@@ -475,6 +475,13 @@ gl.compressedTexImage2D(
     - half-float: High dynamic range imaging
     - full-float: Variance shadow maps soft shadow
 
+* Seamless cube map
+
+Cube map is already available in WebGL 1. What's new in WebGL 2 is that the cube map is 
+seamless (and is always seamless, unlike in OpenGL where you can set it). With this feature 
+we are free from using hacks to get rid of the artifacts near the boarders.
+
+
 * A set of additional texture formats
 
 ```javascript
@@ -605,6 +612,17 @@ Some very handy functions such as `textureOffset`, `texelFetch`, `dFdx`, `textur
 These allow identification of instances and vertices within the shader.
 
 
+* Other function name changes
+
+For example, `texture2D(sampler2D sampler, vec2 coord)`, `textureCube(samplerCube sampler, vec3 coord)`, 
+(and `texture3D` if there is any in our old version) are now replaced with a set of 
+overrided functions of `texture`
+
+```GLSL
+gvec4 texture (gsampler2D sampler, vec2 P [, float bias] )
+gvec4 texture (gsampler3D sampler, vec3 P [, float bias] )
+gvec4 texture (gsamplerCube sampler, vec3 P [, float bias] )
+```
 
 
 
