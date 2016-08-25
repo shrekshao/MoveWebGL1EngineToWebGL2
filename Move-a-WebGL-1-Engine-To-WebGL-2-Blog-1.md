@@ -60,7 +60,7 @@ MRT is an important extension, so makes a useful example case.
 
 ### WebGL 1
 
-For MRT we used the `WEBGL_draw_buffers` extension as a work-around to write g-buffers in a single pass. 
+For MRT we used the [`WEBGL_draw_buffers`](https://www.khronos.org/registry/webgl/extensions/WEBGL_draw_buffers/) extension as a work-around to write g-buffers in a single pass. 
 Though it is widely supported (57%+ browsers, according to [WebGL stats](http://webglstats.com/)), the extension-style code doesn’t make us feel good:
 
 ```javascript
@@ -158,7 +158,7 @@ gl.framebufferTextureLayer(gl.DRAW_FRAMEBUFFER, gl.COLOR_ATTACHMENT2, texture, 0
 
 Instancing is a great performance booster for certain types of geometry, especially objects with many instances but without many vertices. Good examples are grass and fur. Instancing avoids the overhead of an individual API call per object, while minimizing memory costs by avoiding storing geometric data for each separate instance.
 
-Instancing is exposed through the `ANGLE_instanced_arrays` extension in WebGL 1 ([92%+ support](http://webglstats.com/)). 
+Instancing is exposed through the [`ANGLE_instanced_arrays`](https://www.khronos.org/registry/webgl/extensions/ANGLE_instanced_arrays/) extension in WebGL 1 ([92%+ support](http://webglstats.com/)). 
 Now with WebGL 2 we can simply use `drawArraysInstanced` or 
 `drawArraysInstanced` for the draw calls. 
 
@@ -196,7 +196,7 @@ void main() {
 
 VAO is very useful in terms of engine design. 
 It allows us to store vertex array states for a set of buffers in a single, easy to manage object. 
-It is exposed through the `OES_vertex_array_object` extension in WebGL 1 ([89%+](http://webglstats.com/)). 
+It is exposed through the [`OES_vertex_array_object`](https://www.khronos.org/registry/webgl/extensions/OES_vertex_array_object/) extension in WebGL 1 ([89%+](http://webglstats.com/)). 
 
 
 | WebGL 1 with extension | WebGL 2 |
@@ -256,7 +256,7 @@ The fragment shader can explicitly control the depth value for the current fragm
 This operation can be expensive because it forces the GPU to bypass its normal early-out fragment discard behavior. 
 However, it is needed in cases where the z-depth is modified on the fly.
 
-This functionality is exposed through the `EXT_frag_depth` extension in WebGL 1 ([66%+](http://webglstats.com/)). 
+This functionality is exposed through the [`EXT_frag_depth`](https://www.khronos.org/registry/webgl/extensions/EXT_frag_depth/) extension in WebGL 1 ([66%+](http://webglstats.com/)). 
 
 ```GLSL
 out float gl_FragDepth;
