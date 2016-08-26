@@ -605,6 +605,7 @@ for more details. Here is a [WebGL 2 Sample of centroid sampling](http://webglsa
 * New built-in functions
 
 Some very handy functions such as `textureOffset`, `texelFetch`, `dFdx`, `textureGrad`, `textureLOD`, etc. 
+You can always find the complete lists in [GLSL 3.00 ES Spec](https://www.khronos.org/registry/gles/specs/3.0/GLSL_ES_Specification_3.00.4.pdf) 
 
 * `gl_InstanceID` and `gl_VertexID`
 
