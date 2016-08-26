@@ -9,9 +9,9 @@ to WebGL 2? Things to consider:
 
 In this article, we are focusing on the main promoted features, which are supported by extensions in WebGL 1 that 
 are part of the core of WebGL 2 thus cannot be accessed in the old manner, together with some other 
-compatibility issues. You can get an idea about the code that has to be changed in this article. 
+compatibility issues. You can get an idea about the part that has to be changed in this article. 
 
-You can find answers to the other two questions in our next article, focusing on introducting new features. 
+And You can find answers to the other two questions in our next article, focusing on introducting new features. 
 
 Besides, you may want some complete working sample code for reference instead of just code snippets some time. 
 [**WebGL 2 Samples pack**](https://github.com/WebGLSamples/WebGL2Samples) is a something you will find useful. 
@@ -64,8 +64,8 @@ potential compatibility issues they may cause.
 First let's find if there's a way to change fewest existing WebGL 1 code using the extension 
 to make it work correctly with WebGL 2 context. 
 
-We may find that in some cases (instancing and VAO), it's only the function we are calling changes from the extension version to core version, 
-while the pipeline doesn't change. We used to call `fooEXT`, now we simply switched to `foo`. 
+We may find that in some cases (instancing and VAO), it's only the function we are calling that changes from the extension version to core version, 
+while the parameters and pipeline doesn't change. We used to call `fooEXT`, now we simply switched to `foo`. 
 
 Thanks for Javascript neat support of function object, one solution can be that we create 
 a function handler at startup, assigned with either the extension version from WebGL 1 or the core version from WebGL 2. 
@@ -79,9 +79,8 @@ if (!webgl2) {
     //...
 }
 ```
-Yet this method can fail when changes are made in the shader (MRT). 
-
-That's the general strategy. Now let’s take a look at how the code changes for each of these features. 
+Yet this method can fail when changes are made in the shader (MRT). We still need to take a close look at each of these promoted features.
+So now let’s take a look at how the code changes for each of them. 
 
 ## Multiple Render Targets - Deferred Rendering
 
