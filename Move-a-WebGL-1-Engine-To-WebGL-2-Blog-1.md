@@ -279,7 +279,7 @@ gvec4 texture (gsampler2D sampler, vec2 P [, float bias] )
 ## Fragment Depth
 
 The fragment shader can explicitly set the depth value for the current fragment.
-This operation can be expensive because it can force disable early-z optimizations. 
+This operation can be expensive because it can cause the early-z optimization to be disabled.
 However, it is needed in cases where the z-depth is modified on the fly.
 
 This functionality is exposed through the [`EXT_frag_depth`](https://www.khronos.org/registry/webgl/extensions/EXT_frag_depth/) extension in WebGL 1 ([66%+](http://webglstats.com/)). 
@@ -311,3 +311,4 @@ Look here for more information: [WebGL 2 Spec Ch4.1](https://www.khronos.org/reg
 * Cesium https://github.com/AnalyticalGraphicsInc/cesium 
 * WebGL Stats http://webglstats.com/ 
 * WebGL 2 for Siggraph Asia 2015 https://docs.google.com/presentation/d/1Orx0GB0cQcYhHkYsaEcoo5js3c5-pv7ahPniIRIzzfg/edit#slide=id.gd1fc5cab2_0_8
+* https://software.intel.com/en-us/articles/early-z-rejection-sample
