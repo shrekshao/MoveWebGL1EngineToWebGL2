@@ -73,14 +73,15 @@ And for the rest of the code we call this function handler.
 
 ```javascript
 if (!webgl2) {
-    gl.createVertexArray = ext.createVerteXArrayOES;    // TODO: check the extension page when has network
+    vaoExt = gl.getExtension("OES_vertex_array_object");
+    //...
+    gl.createVertexArray = vaoExt.createVerteXArrayOES;
     //...
 }
 ```
 Yet this method can fail when changes are made in the shader (MRT). 
 
-
-Now Let’s take a look at how the code changes for each of these features. 
+That's the general strategy. Now let’s take a look at how the code changes for each of these features. 
 
 ## Multiple Render Targets - Deferred Rendering
 
