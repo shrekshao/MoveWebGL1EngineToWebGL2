@@ -624,4 +624,17 @@ gvec4 texture (gsamplerCube sampler, vec3 P [, float bias] )
 
 
 
+# Credits
 
+* Brandon Jones http://blog.tojicode.com/2013/09/whats-coming-in-webgl-20.html 
+* Hongwei Li https://zhuanlan.zhihu.com/p/19957067?refer=webgl 
+* WebGL 2 Spec https://www.khronos.org/registry/webgl/specs/latest/2.0/ 
+* OpenGL ES 3 Spec https://www.khronos.org/registry/gles/specs/3.0/es_spec_3.0.0.pdf
+* OpenGL ES 3 Programming Guide http://1.droppdf.com/files/v4voM/addison-wesley-opengl-es-3-0-programming-guide-2nd-2014.pdf
+* http://gamedev.stackexchange.com/questions/9668/what-are-3d-textures
+* http://www.gamedev.net/topic/655969-speed-gluniform-vs-uniform-buffer-objects/ 
+* Sijie Tian https://hacks.mozilla.org/2014/01/webgl-deferred-shading/
+* Dong Dong https://www.zhihu.com/question/49327688/answer/115691345?from=profile_answer_card 
+* Cesium https://github.com/AnalyticalGraphicsInc/cesium 
+* WebGL Stats http://webglstats.com/ 
+* WebGL 2 for Siggraph Asia 2015 https://docs.google.com/presentation/d/1Orx0GB0cQcYhHkYsaEcoo5js3c5-pv7ahPniIRIzzfg/edit#slide=id.gd1fc5cab2_0_8
