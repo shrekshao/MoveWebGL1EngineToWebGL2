@@ -76,7 +76,7 @@ And for the rest of the code we call this function handler.
 if (!webgl2) {
     vaoExt = gl.getExtension("OES_vertex_array_object");
     //...
-    gl.createVertexArray = vaoExt.createVerteXArrayOES;
+    gl.createVertexArray = vaoExt.createVertexArrayOES;
     //...
 }
 ```
