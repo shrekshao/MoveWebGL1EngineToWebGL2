@@ -241,7 +241,8 @@ a `gl.ANY_SAMPLES_PASSED` query around a set of draw calls.
 We can use these queries and so get rid of specialized picking method code. 
 
 Keep in mind that these queries are asynchronous. A query's result is never available 
-in the same frame that the query is issued. 
+in the same frame that the query is issued. This is different from OpenGL ES 3 where query result 
+may be available in the same frame. It's an application portability concern. 
 
 ```javascript
 gl.beginQuery(gl.ANY_SAMPLES_PASSED, query);
