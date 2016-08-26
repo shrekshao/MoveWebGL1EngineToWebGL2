@@ -112,7 +112,7 @@ gl.generateMipmap(gl.TEXTURE_3D);
 ```
 
 
-Last but not the least, the 2D Texture Array concept is available with the 3D Texture feature. That is, multiple 3D textures can be stored in an array that can be accessed.
+Last but not the least, the 2D Texture Array concept is available with the 3D Texture feature. That is, multiple 2D textures can be stored in an array that can be accessed.
 It has its own sampler: `sampler2DArray`, but it shares the `texImage3D` GL functions. 
 Here's an example call: 
 
