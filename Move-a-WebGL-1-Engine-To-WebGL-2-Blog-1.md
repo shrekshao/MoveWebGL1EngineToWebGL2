@@ -7,14 +7,14 @@ to WebGL 2? Things to consider:
 * What can be done in a better way?
 * What new features and functionalities can I add to my engine?
 
-In this article, we are focusing on the main promoted features, which are supported by extensions in WebGL 1 that 
-are part of the core of WebGL 2 thus cannot be accessed in the old manner, together with some other 
-compatibility issues. You can get an idea about the part that has to be changed in this article. 
+In this article we are focused on the first question. We discuss the main promoted features, which are supported
+by extensions in WebGL 1 that are part of the core of WebGL 2 and thus cannot be accessed in the old manner, along with some other 
+compatibility issues. 
 
-And You can find answers to the other two questions in our next article, focusing on introducting new features. 
+You can find answers to the other two questions in our next article, which focuses on introducing new features. 
 
-Besides, you may want some complete working sample code for reference instead of just code snippets some time. 
-[**WebGL 2 Samples pack**](https://github.com/WebGLSamples/WebGL2Samples) is a something you will find useful. 
+In the future you may want some complete working sample code for reference, instead of just code snippets. 
+[**WebGL 2 Samples pack**](https://github.com/WebGLSamples/WebGL2Samples) is a resource you'll find useful. 
 
 That's enough for an intro. First of all, let's get WebGL 2 working on your machine. 
 
@@ -63,14 +63,14 @@ In this first blog entry we are going to focus on these promoted features, toget
 potential compatibility issues they may cause. 
 
 First let's find if there's a way to change fewest existing WebGL 1 code using the extension 
-to make it work correctly with WebGL 2 context. 
+to make it work correctly with a WebGL 2 context. 
 
 We may find that in some cases (instancing and VAO), it's only the function we are calling that changes from the extension version to core version, 
-while the parameters and pipeline doesn't change. We used to call `fooEXT`, now we simply switched to `foo`. 
+while the parameters and pipeline don't change. We used to call `fooEXT`, now we simply switch to `foo`. 
 
-Thanks for Javascript neat support of function object, one solution can be that we create 
+Thanks to Javascript's neat support of function objects, one solution is that we can create 
 a function handler at startup, assigned with either the extension version from WebGL 1 or the core version from WebGL 2. 
-And for the rest of the code we call this function handler.
+Within the rest of the code we call this function handler.
 
 ```javascript
 if (!webgl2) {
@@ -80,7 +80,7 @@ if (!webgl2) {
     //...
 }
 ```
-Yet this method can fail when changes are made in the shader (MRT). We still need to take a close look at each of these promoted features.
+Yet this method can fail when changes are made in the shader (e.g., MRT). We still need to take a close look at each of these promoted features.
 So now let’s take a look at how the code changes for each of them. 
 
 ## Multiple Render Targets
