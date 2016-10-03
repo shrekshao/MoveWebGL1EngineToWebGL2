@@ -10,7 +10,7 @@ Previously, if we want antialiasing we would either have to
 render it to the default backbuffer or 
 perform our own post-process AA (such as FXAA or [SMAA](http://threejs.org/examples/#webgl_postprocessing_smaa)) on content rendered to a texture.
 
-Now, with Multisampled Renderbuffers, we can now use the general rendering pipeline in 
+Now, with Multisampled Renderbuffers, we can use the general rendering pipeline in 
 WebGL to provide multisampled antialiasing (MSAA):
 > pre-z pass --> rendering pass to FBO --> postprocessing pass --> render to window
 
@@ -142,11 +142,10 @@ That's quite a large percentage. We always have to call them to update uniform v
 What's more, it can be annoying that we have to make duplicated uniform calls for one same uniform object shared by several shaders.  
 
 Now the Uniform buffer object may bring us a boost in performance by allowing us to store blocks of uniforms 
-in buffers stored on the GPU, just like vertex/index buffers.  
-This can make switching between sets of uniforms faster. 
+in buffers stored on the GPU, just like vertex/index buffers. This can make switching between sets of uniforms faster. 
 Additionally, uniform buffers can be shared by multiple programs at the same time. 
 
-That's quite a few benefits. But, with so many improvements, the setup routine is about to 
+Those are quite a few benefits. But, with so many improvements, the setup routine is about to 
 change a lot. We will have a basic setup example first, and then look at something that 
 might need your attention. 
 
@@ -271,9 +270,10 @@ gl.endQuery(gl.ANY_SAMPLES_PASSED);
 In WebGL 1 texture image data and sampling information (which tells GPU how to read the image data) 
 are both stored in texture objects. It can be annoying when we want to read from the same texture twice 
 but with a different method (say, linear filtering vs nearest filtering) because we need to have 
-two texture objects. But, with sampler objects, we can separate these two concepts. We can have one 
+two texture objects. With sampler objects, we can separate these two concepts. We can have one 
 texture object and two different sampler objects. This will result in a change in how our engine organize 
-textures.  
+textures.
+  
 Here's an example: 
 
 ```javascript
@@ -311,9 +311,9 @@ In WebGL 1, when we want to implement such feature, usually a texture
 storing the states of particles is inevitable. Two textures, to be precise, 
 storing states from previous frame and current frame, and ping-pong between them.
 
-Here's an example of WebGL 1 approach (from [toji's WebGL Particles take 2](https://github.com/toji/webgl2-particles-2))
+Here's an example of the WebGL 1 approach (from [toji's WebGL Particles take 2](https://github.com/toji/webgl2-particles-2)).
 
-In the first pass fragment shader, 
+In the first-pass fragment shader, 
 do the simulation, and store the position results in a texture. 
 
 ```GLSL
@@ -356,7 +356,7 @@ void main() {
 }
 ``` 
 
-This is how we do it in WebGL 2. With Transform feedback, we can discard the fragment shader 
+What follows is how we do it in WebGL 2. With Transform feedback, we can discard the fragment shader 
 in step 1, as well as the texture. We write the output (position) of the vertex shader in step 1 to the 
 vertex attribute array input of step 2. (In practice, you still need a placeholder trivial fragment shader 
 for the first step to correctly compile the program.)
@@ -405,7 +405,7 @@ gl.bindBufferBase(gl.TRANSFORM_FEEDBACK_BUFFER, 0, null);
 ```
 
 
-## A set of texture new features:
+## A set of new texture features:
 
 Here is a list of the new texture features in WebGL 2. 
 
@@ -423,10 +423,10 @@ gl.texImage2D(
 );
 ```
 
-The sRGB texture will be automatically converted to linear space when being fetched in the shader. For physically-based rendering and other operations we normally want to deal with colors in a linear space, not a display space.
+The sRGB texture will be automatically converted to linear space when being fetched in the shader. For physically-based rendering and other operations we normally want to deal with colors in a linear space, not in display space.
 
 
-* Vertex texture
+* Vertex texture for:
     * terrain
     * water
     * skeleton animation
@@ -470,7 +470,7 @@ gl.compressedTexImage2D(
     - half-float: High dynamic range imaging
     - full-float: Variance shadow maps soft shadow
 
-    - a feature coming together with **floating point texture** is **floating point renderbuffer** (also with multisample support).
+    - a feature coming together with **floating point textures** is **floating point renderbuffer** (also with multisample support).
 
 
 
@@ -478,7 +478,7 @@ gl.compressedTexImage2D(
 
 Cube map is already available in WebGL 1. What's new in WebGL 2 is that the cube map is 
 seamless (and is always seamless, unlike in OpenGL where you can set it). With this feature 
-we are free from using hacks to get rid of the artifacts near the boarders.
+we are free from using hacks to get rid of the artifacts near the borders.
 
 
 * A set of additional texture formats
@@ -549,14 +549,14 @@ at the start.
 
 Note that a shader in GLSL 1.00 is still fully supported in a WebGL 2 context. It's only the GLSL 3.00 ES grammar that 
 doesn't have backwards compatibility with GLSL 1.00. 
-Only when a `#version 300 es` tag is added at the top of the shaders will the GLSL 3.00 ES version turned on. 
+Only when a `#version 300 es` tag is added at the top of the shaders will the GLSL 3.00 ES version be turned on. 
 
 We will quickly list here a bunch of new features and new built-in functions in GLSL 3.00 ES. 
 
 * Layout qualifiers
 
 Vertex shader inputs can now be declared with layout qualifiers to explicitly bind the location 
-in the shader source without requiring making `gl.getAttribLocation` calls, like this: 
+in the shader source without requiring making `gl.getAttribLocation` calls. These are declared like this: 
 
 ```GLSL
 #version 300 es
@@ -586,12 +586,12 @@ memory layout for uniform blocks.
 
 * Non-square matrix
 
-Quite straightforward. One use case is replace a 4x4 affine matrix where the last row is (0, 0, 0, 1) with 
+Quite straightforward. One use case is replacing a 4x4 affine matrix where the last row is (0, 0, 0, 1) with 
 a 4x3 matrix. 
 
 * Full integer support
 
-Built-in functions can now take integer as input variable. 
+Built-in functions can now take an integer as an input variable. 
 
 * Flat/smooth interpolators
 
@@ -605,7 +605,7 @@ for more details. Here is a [WebGL 2 Sample of centroid sampling](http://webglsa
 * New built-in functions
 
 Some very handy functions such as `textureOffset`, `texelFetch`, `dFdx`, `textureGrad`, `textureLOD`, etc. 
-You can always find the complete lists in [GLSL 3.00 ES Spec](https://www.khronos.org/registry/gles/specs/3.0/GLSL_ES_Specification_3.00.4.pdf) 
+You can always find the complete lists in the [GLSL 3.00 ES Spec](https://www.khronos.org/registry/gles/specs/3.0/GLSL_ES_Specification_3.00.4.pdf) 
 
 * `gl_InstanceID` and `gl_VertexID`
 
