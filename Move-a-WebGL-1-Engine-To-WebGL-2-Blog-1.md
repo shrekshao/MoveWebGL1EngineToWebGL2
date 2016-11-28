@@ -261,18 +261,20 @@ gl.drawArrays(gl.TRIANGLES, 0, 6);
 
 ## Shader Texture LOD
 
-The Shader Texture LOD Bias control makes mipmap level control simpler for glossy environment effects in physically based rendering. 
+The Shader Texture LOD control makes mipmap level control simpler for glossy environment effects in physically based rendering. 
 This functionality is exposed through the [`EXT_shader_texture_lod`](https://www.khronos.org/registry/webgl/extensions/EXT_shader_texture_lod/) extension in WebGL 1 ([71%+](http://webglstats.com/)).
 
 ```GLSL
 vec4 texture2DLodEXT(sampler2D sampler, vec2 coord, float lod)
 ```
 
-Now as part of core, the lodBias can be passed as an optional parameter to `texture` 
+Now as part of core, the lod can be passed as an optional parameter to `texture` 
 
 ```GLSL
-gvec4 texture (gsampler2D sampler, vec2 P [, float bias] )
+gvec4 textureLod (gsampler2D sampler, vec2 P, float lod)
 ```
+
+
 
 
 
