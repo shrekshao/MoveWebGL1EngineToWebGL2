@@ -149,6 +149,12 @@ gl.framebufferTexture2D(gl.DRAW_FRAMEBUFFER, gl.COLOR_ATTACHMENT1, gl.TEXTURE_2D
 gl.framebufferTexture2D(gl.DRAW_FRAMEBUFFER, gl.COLOR_ATTACHMENT2, gl.TEXTURE_2D, tex[2], 0);
 ```
 
+Defines an array of buffers into which outputs will be writtern
+
+```javascript
+gl.drawBuffers( [gl.COLOR_ATTACHMENT0, gl.COLOR_ATTACHMENT1, gl.COLOR_ATTACHMENT2] );
+```
+
 Instead of mapping color attachments to the draw buffer, 
 we directly use multiple `out` variables in the fragment shader. 
 This code actually benefits from the new [GLSL 3.0 ES](https://www.khronos.org/registry/gles/specs/3.0/GLSL_ES_Specification_3.00.3.pdf), which we will discuss later in another blog post. 
